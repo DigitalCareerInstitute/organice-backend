@@ -1,13 +1,18 @@
-const mongoose = require("mongoose");
-const User = mongoose.model("User");
-const bcrypt = require("bcrypt");
+// const mongoose = require("mongoose");
+// const User = mongoose.model("User");
+// const bcrypt = require("bcrypt");
 
-exports.authenticate = async (req, res) => {
-  if (!req.user) {
-    return res.redirect("/api/users/register");
-  }
-
-  const users = await User.findOne();
-
-  response.render("api/scans/");
-};
+// exports.authenticateUser = async (req, res) => {
+//   if (!req.user) {
+//     res.status(401);
+//     res.send({
+//       failed: "Unauthorized Access"
+//     });
+//   } else {
+//     res.status(200);
+//     res.send({
+//       success: "Welcome to the JWT Auth",
+//       token: JWTToken
+//     });
+//   }
+// };
