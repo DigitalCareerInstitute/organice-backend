@@ -12,11 +12,11 @@
 
 ### Registrations and login routes
 
-localhost:8080/api/users/register -post
+localhost:8080/api/users/register (post)
 
-localhost:8080/api/users/login -post
+localhost:8080/api/users/login (post)
 
-localhost:8080/api/users/reset -post
+localhost:8080/api/users/reset (post)
 
 #### Protected Routes (returns "yes" if token is valid )
 
