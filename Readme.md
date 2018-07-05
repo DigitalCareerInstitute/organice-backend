@@ -24,6 +24,8 @@ localhost:8080/api/users/delete (delete)
 
 localhost:8080/api/users/edit (post)
 
+----------------------------------------
+
 localhost:8080/api/scans/new  (create)
 
 localhost:8080/api/scans/edit 
@@ -34,12 +36,14 @@ localhost:8080/api/scans/
 
 localhost:8080/api/scans/:id/
 
-localhost:8080/api/catigories/new  (create)
+----------------------------------------
 
-localhost:8080/api/catigories/edit  (edit catigories)
+localhost:8080/api/categories/new  (create)
 
-localhost:8080/api/catigories/delete
+localhost:8080/api/categories/edit  (edit categories)
 
-localhost:8080/api/catigories/
+localhost:8080/api/categories/delete
 
-localhost:8080/api/catigories/:id/
+localhost:8080/api/categories/
+
+localhost:8080/api/categories/:id/
