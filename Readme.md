@@ -25,6 +25,7 @@ localhost:8080/api/users/delete (delete)
 localhost:8080/api/users/edit (post)
 
 ----------------------------------------
+#### Scans
 
 localhost:8080/api/scans/new  (create)
 
@@ -37,6 +38,7 @@ localhost:8080/api/scans/
 localhost:8080/api/scans/:id/
 
 ----------------------------------------
+#### Categories
 
 localhost:8080/api/categories/new  (create)
 
