@@ -6,11 +6,11 @@
 2.  Run `npm install` in your terminal to get all needed packages.
 3.  Copy **the variables.env.sample** file to **variables.env**.
 4.  Edit the configuration to fit your setup and needs.
-5.  Run `node app.js` ,or through **NODEMON** `node app.js`
+5.  Run `node app.js` ,or through **NODEMON** `nodemon app.js`
 
 ## Routing
 
-### registrations and login routes
+### Registrations and login routes
 
 localhost:8080/api/users/register -post
 
@@ -20,13 +20,13 @@ localhost:8080/api/users/reset -post
 
 #### Protected Routes (returns "yes" if token is valid )
 
-localhost:8080/api/users/delete -delete
+localhost:8080/api/users/delete (delete)
 
-localhost:8080/api/users/edit -post
+localhost:8080/api/users/edit (post)
 
-localhost:8080/api/scans/new -- create
+localhost:8080/api/scans/new  (create)
 
-localhost:8080/api/scans/edit -- add labels
+localhost:8080/api/scans/edit 
 
 localhost:8080/api/scans/delete
 
@@ -34,12 +34,12 @@ localhost:8080/api/scans/
 
 localhost:8080/api/scans/:id/
 
-localhost:8080/api/labels/new -- create
+localhost:8080/api/catigories/new  (create)
 
-localhost:8080/api/labels/edit -- edit labels
+localhost:8080/api/catigories/edit  (edit catigories)
 
-localhost:8080/api/labels/delete
+localhost:8080/api/catigories/delete
 
-localhost:8080/api/labels/
+localhost:8080/api/catigories/
 
-localhost:8080/api/labels/:id/
+localhost:8080/api/catigories/:id/
