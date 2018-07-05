@@ -1,11 +1,13 @@
 const restify = require("restify");
 const mongoose = require("mongoose");
-const userRoutes = require("./routes/userRoutes");
-
+const routes = require("./routes/web");
 require("dotenv").config({ path: "variables.env" });
 
+// Require the models
+
 require("./models/User");
-require("./models/Label");
+require("./models/Category");
+require("./models/Scan");
 
 let mongooseOptions = {};
 
@@ -36,8 +38,9 @@ mongoose
     process.exit(1);
   });
 
-const server = restify.createServer();
+// Restify Server
 
+const server = restify.createServer();
 server.use(restify.plugins.queryParser());
 server.use(restify.plugins.bodyParser());
 
@@ -46,13 +49,28 @@ server.use(function logger(req, res, next) {
   next();
 });
 
-server.on("uncaughtException", function(request, response, route, error) {
+server.on("uncaughtException", function(req, res, route, error) {
   console.error(error.stack);
-  response.send(error);
+  res.send(error);
 });
 
-userRoutes.applyRoutes(server, "/api/users");
+routes.applyRoutes(server, "");
 
-server.listen(process.env.PORT || 8080, function() {
-  console.log("%s listening at %s", server.name, server.url);
+// Display the routes in the console ;)
+
+const port = process.env.PORT || "8080";
+const domain = process.env.DOMAIN || "localhost";
+
+console.log("Routes:");
+for (const key in server.router._registry._routes) {
+  console.log(
+    "\x1b[36m%s\x1b[0m",
+    key,
+    `http://${domain}:${port}${server.router._registry._routes[key].spec.path}`
+  );
+}
+console.log(`========================`);
+
+server.listen(port, function() {
+  console.log(`👂 Listening at http://${domain}:${port} 👂`);
 });

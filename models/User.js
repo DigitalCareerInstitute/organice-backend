@@ -5,13 +5,9 @@ const mongodbErrorHandler = require("mongoose-mongodb-errors");
 const passportLocalMongoose = require("passport-local-mongoose");
 
 const userSchema = new mongoose.Schema({
-  first_name: {
+  user_name: {
     type: String
     // required: "You must provide a first name"
-  },
-  last_name: {
-    type: String
-    // required: "You must provide a last name"
   },
   email: {
     type: String,
@@ -25,20 +21,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: "You must provide a password"
   },
-  birthday: { type: Date },
-  phone: {
-    type: String,
-    trim: true,
-    validate: {
-      validator: function(v) {
-        return /^[0-9\- +\(\)\/]{10,30}+$/.test(v);
-      },
-      message: "Please supply a valid phone number!"
-    }
-  },
-  avatar: String,
-  photo: String,
-  slug: String,
+  // avatar: String, /* optional for the moment*/
   resetPasswordToken: String,
   resetPasswordExpires: Date
 });
