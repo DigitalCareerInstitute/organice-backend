@@ -1,40 +1,37 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
-const validator = require("validator");
+mongoose.Promise = global.Promise;
+const md5 = require("md5");
+const isEmail = require("validator/lib/isEmail");
 const mongodbErrorHandler = require("mongoose-mongodb-errors");
 const passportLocalMongoose = require("passport-local-mongoose");
 
 const userSchema = new mongoose.Schema({
-  user_name: {
-    type: String
-    // required: "You must provide a first name"
+  name: {
+    type: String,
+    trim: true,
+    required: "You must supply a user name",
+    unique: true
   },
   email: {
     type: String,
     unique: true,
     lowercase: true,
     trim: true,
-    required: "Please supply an email address"
-    // validate: [validator.isEmail, "Invalid email address"],
-  },
-  password: {
-    type: String,
-    required: "You must provide a password"
+    required: "Please supply an email address",
+    validate: [isEmail, "Invalid email address"]
   },
   // avatar: String, /* optional for the moment*/
   resetPasswordToken: String,
   resetPasswordExpires: Date
 });
 
-// userSchema.methods.generateHash = function(password) {
-//   return bcrypt.hashSync(password, bcrypt.genSaltSync(10));
-// };
+/* Generating AVATAR for the user relying on GRAVATAR */
+// userSchema.virtual("gravatar").get(function() {
+//  const hash = md5(this.email)
+//  return `https://gravatar.com/avatar/${hash}?s=200`
+// });
 
-// userSchema.method.validatePassword = function(password) {
-//   return bcrypt.compareSync(password, this.local.password);
-// };
-
-// userSchema.plugin(passportLocalMongoose, { usernameField: "email" });
-// userSchema.plugin(mongodbErrorHandler);
+userSchema.plugin(passportLocalMongoose, { usernameField: "name" });
+userSchema.plugin(mongodbErrorHandler);
 
 module.exports = mongoose.model("User", userSchema);
