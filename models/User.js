@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 mongoose.Promise = global.Promise;
 const md5 = require("md5");
-const isEmail = require("validator/lib/isEmail");
+// const isEmail = require("validator/lib/isEmail");
+const validator = require("validator");
 const mongodbErrorHandler = require("mongoose-mongodb-errors");
 const passportLocalMongoose = require("passport-local-mongoose");
 
@@ -18,9 +19,14 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     trim: true,
     required: "Please supply an email address",
-    validate: [isEmail, "Invalid email address"]
+    validate: [validator.isEmail, "Invalid email address"]
   },
-  // avatar: String, /* optional for the moment*/
+  // avatar: String /* optional for the moment*/,
+  token: {
+    type: String,
+    trim: true,
+    unique: true
+  },
   resetPasswordToken: String,
   resetPasswordExpires: Date
 });

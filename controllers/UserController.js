@@ -1,50 +1,45 @@
 const mongoose = require("mongoose");
 const User = require("../models/User");
+const jwt = require("jsonwebtoken");
 // const User = mongoose.model("User", UserModel.userSchema);
 const passport = require("passport");
-
-const jwt = require("jsonwebtoken");
 const promisify = require("es6-promisify");
-
-exports.validateRegister = (req, res, next) => {
-  req.sanitize("name");
-  req.check("name", "You must supply a name!").notEmpty();
-  req.check("email", "That Email is not valid!").isEmail();
-
-  req.check("password", "Password Cannot be Blank!").notEmpty();
-  req
-    .check("password-confirm", "Confirmed Password cannot be blank!")
-    .notEmpty();
-  req
-    .check("password-confirm", "Oops! Your passwords do not match")
-    .equals(req.body.password);
-
-  // const errors = req.validationErrors();
-  // if (errors) {
-  //   req.flash('error', errors.map(err => err.msg));
-  //   res.render('register', { title: 'Register', body: req.body, flashes: req.flash() });
-  //   return; // stop the fn from running
-  // }
-  next(); // there were no errors!
-};
 
 exports.register = async (req, res, next) => {
   const register = promisify(User.register, User);
 
   const user = new User({
-    email: req.body.email,
-    name: req.body.name
+    name: req.body.name,
+    email: req.body.email
   });
 
   register(user, req.body.password)
     .then(user => {
+      const jwtToken = jwt.sign(
+        {
+          name: user.name,
+          email: user.email,
+          id: user._id
+        },
+        process.env.JWTSECRET,
+        {
+          expiresIn: "2d"
+        }
+      );
+
+      console.log(jwtToken);
+
+      user.token = jwtToken;
+      user.save();
+
       res.json({
         code: 200,
         message: "User registered successfully. Please check the email.",
         user: {
           name: req.body.name,
           email: req.body.email,
-          id: user._id
+          id: user._id,
+          token: user.token
         }
       });
       next();
@@ -61,7 +56,7 @@ exports.register = async (req, res, next) => {
 
 exports.deleteAllUsers = async (req, res, next) => {
   User.remove({}, function(err) {
-    console.log("collection removed");
+    console.log("All users are removed");
     res.send("Successfully deleted all users");
     next();
   });

@@ -1,7 +1,6 @@
 const restify = require("restify");
 const util = require("util");
 const mongoose = require("mongoose");
-const routes = require("./routes/web");
 const validator = require("validator");
 const passport = require("passport");
 const promisify = require("es6-promisify");
@@ -11,6 +10,12 @@ const errorHandlers = require("./handlers/errorHandlers");
 const JWTAuthenticatedUser = require("./handlers/JWTAuthenticatedUser");
 require("./handlers/passport");
 require("dotenv").config({ path: "variables.env" });
+//const requireAuth = passport.authenticate("jwt", { session: false });
+
+const routes = {
+  public: require("./routes/public"),
+  private: require("./routes/private")
+};
 
 const server = restify.createServer();
 
@@ -76,10 +81,18 @@ server.on("uncaughtException", function(req, res, route, error) {
   res.send(error);
 });
 
-// server.get("/api", JWTAuthenticatedUser.check);
-server.use(JWTAuthenticatedUser.check);
+routes.public.applyRoutes(server, "/api");
+routes.private.applyRoutes(server, "/api");
 
-routes.applyRoutes(server, "/");
+// server.get("/api", requireAuth, async (req, res, next) => {
+//   res.send("valid");
+//   next();
+// });
+
+// server.get("/api", JWTAuthenticatedUser.check);
+//server.use(JWTAuthenticatedUser.check);
+
+// server.use(passport.authenticate("jwt", { session: false }));
 
 // Display the routes in the console ;)
 const port = process.env.PORT || "8080";

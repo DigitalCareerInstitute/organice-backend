@@ -1,4 +1,7 @@
 /* This function should check the routs you wanna make it secured with a token */
+
+// const requireAuth = passport.authenticate('jwt', { session: false });
+
 exports.check = (req, res, next) => {
   if (req.url.match(/\/api\/.*/)) {
     console.log("do not touch my api");
