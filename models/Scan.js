@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 
 const scanSchema = new mongoose.Schema({
-  // user: {
-  //   type: mongoose.Schema.ObjectId,
-  //   ref: "User",
-  //   required: "user ID is needed"
-  // },
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: "User",
+    required: "user ID is needed"
+  },
   // category: {
   //   type: mongoose.Schema.ObjectId,
   //   ref: "Category",

@@ -6,6 +6,7 @@ require("../handlers/passport");
 // const User = mongoose.model("User");
 const promisify = require("es6-promisify");
 const User = require("../models/User");
+require("../handlers/passport");
 
 exports.validateRegister = (req, res, next) => {
   req.sanitize("name");
@@ -43,9 +44,8 @@ exports.isLoggedIn = (req, res, next) => {
 };
 
 exports.login = (req, res, next) => {
+  // console.log(req);
   passport.authenticate("local", { session: false }, (err, user, info) => {
-    console.log("---------user--------------");
-    console.log(user);
     if (err) {
       return next(err);
     }
@@ -59,17 +59,19 @@ exports.login = (req, res, next) => {
     if (user) {
       const JWTToken = jwt.sign(
         {
-          name: user.name,
+          // name: user.name,
           email: user.email,
           id: user._id
         },
         process.env.JWTSECRET,
         {
-          expiresIn: "2d"
+          expiresIn: "365d"
         }
       );
       User.findByIdAndUpdate({ _id: user._id }, { token: JWTToken }).exec();
 
+      console.log("---------user--------------");
+      console.log(user);
       res.json({
         code: 200,
         message: `Welcome to OrgaNice '${user.name}'`,
@@ -118,8 +120,70 @@ exports.updateUser = async (req, res, next) => {
   });
 };
 
-// exports.editUser = async (req, res, next) => {
-//   const user = await User.findOneAndUpdate({ _id: req.headers.id }, req.body, {
+exports.updatePassword = async (req, res, next) => {
+  console.log("=============update-password===================");
+
+  const user = req.user;
+
+  if (!user) {
+    res.json({
+      code: 403,
+      message: "Password reset is invalid or has expired."
+    });
+  }
+
+  const setPassword = promisify(user.setPassword, user);
+  await setPassword(req.body.password);
+
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+  const updatedUser = await user.save();
+  console.log("==================updated USer===============");
+  console.log(updatedUser);
+  res.json({
+    code: 200,
+    message: `Password successfully updated for user '${user.name}'`,
+    user: {
+      id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+
+      token: updatedUser.token,
+      hash: updatedUser.hash
+    }
+  });
+};
+
+exports.logout = (req, res, next) => {
+  console.log("====================logout-user===================");
+  console.log(req.user);
+  req.logout();
+
+  // const test = User.findById({ id: user._id });
+  // console.log(test);
+  // const test2 = User.findById(jwtPayload.id);
+  // console.log(test2);
+  res.json({
+    message: "successfully logged out"
+  });
+  next();
+};
+
+// exports.logout = (req, res, next) => {
+//   passport.deserializeUser(function(id, done) {
+//     User.findById(id, function(err, user) {
+//       console.log(id);
+//       done(err, user);
+//     });
+//   });
+//   // User.findByIdAndUpdate({ _id: user._id }, { token: "" }).exec();
+//   console.log("test");
+
+//   // req.logout();
+// };
+
+// exports.updatePasswordOld = async (req, res, next) => {
+//   const user = await User.findOneAndUpdate({ _id: req.user.id }, req.body, {
 //     new: true,
 //     runValidators: true
 //   })
@@ -139,25 +203,6 @@ exports.updateUser = async (req, res, next) => {
 //         console.error(err);
 //       }
 //     );
-// };
-
-exports.logout = (req, res, next) => {
-  req.logout();
-  res.json({
-    message: "successfully logged out"
-  });
-  next();
-};
-
-// exports.logout = (req, res, next) => {
-//   passport.deserializeUser(function(id, done) {
-//     User.findById(id, function(err, user) {
-//       console.log(id);
-//       done(err, user);
-//     });
-//   });
-//   // User.findByIdAndUpdate({ _id: user._id }, { token: "" }).exec();
-//   console.log("test");
-
-//   // req.logout();
+//   console.log("============userPassword==================");
+//   console.log(user);
 // };

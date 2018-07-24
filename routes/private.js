@@ -13,19 +13,31 @@ const ScanController = require("../controllers/ScanController");
 
 router.post("/users/update", passportAuthenticate, AuthController.updateUser);
 router.post("/users/logout", passportAuthenticate, AuthController.logout);
-
+router.post(
+  "/users/updatepassword",
+  passportAuthenticate,
+  AuthController.updatePassword
+);
 // SCANS
 router.get("/scans", function(req, res) {
   res.send("SCANS");
 });
 
-router.post("/scans/add", ScanController.createScan);
+router.post("/scans/add", passportAuthenticate, ScanController.createScan);
 
 router.get("/scans/:id", function(req, res) {
   res.send("SINGLE ONE");
 });
-router.post("/scans/update", ScanController.updateScan);
+router.post(
+  "/scans/:id/update",
+  passportAuthenticate,
+  ScanController.updateScan
+);
 
-router.post("/scans/delete", ScanController.deleteScan);
+router.post(
+  "/scans/:id/delete",
+  passportAuthenticate,
+  ScanController.deleteScan
+);
 
 module.exports = router;

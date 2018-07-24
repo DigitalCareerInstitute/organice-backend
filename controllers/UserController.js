@@ -1,9 +1,66 @@
 const mongoose = require("mongoose");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
-// const User = mongoose.model("User", UserModel.userSchema);
 const passport = require("passport");
 const promisify = require("es6-promisify");
+require("../handlers/passport");
+require("dotenv").config({ path: "variables.env" });
+
+const LocalStrategy = require("passport-local").Strategy;
+const passportJWT = require("passport-jwt");
+const JWTStrategy = passportJWT.Strategy;
+const ExtractJWT = passportJWT.ExtractJwt;
+
+exports.registerLocal = (req, res, next) => {
+  passport.use(
+    "local-signup",
+    new LocalStrategy(
+      {
+        // by default, local strategy uses username and password, we will override with email
+        usernameField: "email",
+        passwordField: "password",
+        passReqToCallback: true // allows us to pass back the entire request to the callback
+      },
+
+      function(req, email, password, done) {
+        console.log("I'm PASSPORT");
+        // asynchronous
+        // User.findOne wont fire unless data is sent back
+        process.nextTick(function() {
+          // find a user whose email is the same as the forms email
+          // we are checking to see if the user trying to login already exists
+          User.findOne({ "local.email": email }, function(err, user) {
+            // if there are any errors, return the error
+            if (err) return done(err);
+
+            // check to see if theres already a user with that email
+            if (user) {
+              return done(
+                null,
+                false,
+                req.flash("signupMessage", "That email is already taken.")
+              );
+            } else {
+              // if there is no user with that email
+              // create the user
+              var newUser = new User();
+
+              // set the user's local credentials
+              newUser.local.email = email;
+              newUser.local.password = newUser.generateHash(password);
+
+              // save the user
+              newUser.save(function(err) {
+                if (err) throw err;
+                return done(null, newUser);
+              });
+            }
+          });
+        });
+      }
+    )
+  );
+};
 
 exports.register = async (req, res, next) => {
   const register = promisify(User.register, User);
@@ -17,7 +74,7 @@ exports.register = async (req, res, next) => {
     .then(user => {
       const jwtToken = jwt.sign(
         {
-          name: user.name,
+          // name: user.name,
           email: user.email,
           id: user._id
         },
@@ -61,87 +118,3 @@ exports.deleteAllUsers = async (req, res, next) => {
     next();
   });
 };
-
-// exports.login = passport.authenticate("local", function(req, res, next) {
-//   res.json({
-//     code: 200,
-//     message: "Successfully logged in",
-//     user: {
-//       name: res.name,
-//       email: res.email,
-//       id: res._id
-//     }
-//   });
-//   next().catch(error => {
-//     res.json(442, {
-//       code: 422,
-//       message: "Invalid Email or password",
-//       error
-//     });
-//   });
-//   next();
-// });
-
-// exports.login = passport.authenticate("local", function(req, res) {
-//   console.log("---------req--------------");
-//   console.log(req);
-//   console.log("-----------res------------");
-//   console.log(res);
-//   const email = res.email;
-//   const name = res.name;
-//   const id = res._id;
-//   console.log("----------res.id-------------");
-//   console.log(res._id);
-//   console.log("-----------------------");
-//   res.json({
-//     name,
-//     email,
-//     id
-//   });
-// });
-
-// exports.oldLogin = function(req, res) {
-//   User.findOne({ email: req.body.email })
-//     .exec()
-//     .then(function(user) {
-//       bcrypt.compare(req.body.password, user.password, function(err, result) {
-//         console.log(result);
-//         if (err) {
-//           res.status(401);
-//           res.send({
-//             failed: "Unauthorized Access"
-//           });
-//         }
-//         if (result) {
-//           const JWTToken = jwt.sign(
-//             {
-//               email: user.email,
-//               _id: user._id,
-//               name: user.name
-//             },
-//             process.env.JWTSECRET,
-//             {
-//               expiresIn: "2d"
-//             }
-//           );
-
-//           res.status(200);
-//           res.send({
-//             success: `Welcome to OrgaNice '${user.name}'`,
-//             token: JWTToken
-//           });
-//         } else {
-//           res.status(401);
-//           res.send({
-//             failed: "Unauthorized Access"
-//           });
-//         }
-//       });
-//     })
-//     .catch(error => {
-//       res.status(500);
-//       res.json({
-//         error: error
-//       });
-//     });
-// };

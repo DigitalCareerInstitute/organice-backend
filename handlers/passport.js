@@ -8,41 +8,20 @@ const ExtractJWT = passportJWT.ExtractJwt;
 
 // const User = mongoose.model("User");
 const User = require("../models/User");
+const Scan = require("../models/Scan");
 
 passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-// another login method
-
-// passport.use(
-//   new LocalStrategy(
-//     {
-//       usernameField: "email",
-//       passwordField: "password"
-//     },
-//     function(email, password, cb) {
-//       //this one is typically a DB call. Assume that the returned user object is pre-formatted and ready for storing in JWT
-//       return User.findOne({ email, password })
-//         .then(user => {
-//           if (!user) {
-//             return cb(null, false, { message: "Incorrect email or password." });
-//           }
-//           return cb(null, user, { message: "Logged In Successfully" });
-//         })
-//         .catch(err => cb(err));
-//     }
-//   )
-// );
-
 passport.use(
   new JWTStrategy(
     {
       jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken("jwt"),
-      secretOrKey: process.env.JWTSECRET
+      secretOrKey: process.env.JWTSECRET,
+      passReqToCallback: true
     },
-    function(jwtPayload, cb) {
-      console.log("test");
+    function(req, jwtPayload, cb) {
       return User.findById(jwtPayload.id)
         .then(user => {
           console.log("found user");
