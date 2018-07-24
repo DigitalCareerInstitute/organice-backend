@@ -1,6 +1,14 @@
 const mongoose = require("mongoose");
 const Scan = require("../models/Scan");
-const User = require("../models/User");
+
+exports.getScans = async (req, res) => {
+  const scans = await Scan.find();
+  res.json({
+    code: 200,
+    message: `All scans`,
+    scans: scans
+  });
+};
 
 exports.createScan = async (req, res) => {
   let scanObject = {
@@ -8,7 +16,6 @@ exports.createScan = async (req, res) => {
     title: req.body.title
   };
   const scan = await new Scan(scanObject).save();
-  console.log(`Successfully created "${scan.title}"`);
   res.json({
     code: 200,
     message: `Successfully created '${scan.title}'`,
@@ -31,7 +38,6 @@ const confirmOwner = (scan, user) => {
 
 exports.createScanOld = async (req, res) => {
   const scan = await new Scan(req.body).save();
-  console.log(`Successfully created '${scan.title}'`);
   res.json({
     code: 200,
     message: `Successfully created '${scan.title}'`,
@@ -53,8 +59,6 @@ exports.updateScan = async (req, res) => {
     });
     next(false);
   }
-  console.log(scan);
-  console.log(`Successfully updated '${scan.title}'`);
   res.json({
     code: 200,
     message: `Successfully updated '${scan.title}'`,
@@ -69,8 +73,6 @@ exports.updateScan = async (req, res) => {
 
 exports.deleteScan = async (req, res) => {
   const scan = await Scan.findOne({ _id: req.params.id });
-  console.log("=============scan=============");
-  console.log(scan);
 
   if (scan === null) {
     res.json({
@@ -83,14 +85,9 @@ exports.deleteScan = async (req, res) => {
   if (req.params.id === scan.id) {
     scan.remove(function(err) {
       if (err) throw err;
-      console.log(`Successfully removed`);
       res.json({
         code: 200,
         message: `Successfully removed`
-        // ser_name: req.user.name,
-        // user_id: req.user._id,
-        // scan_title: req.body.title,
-        // scan_id: scan._id
       });
     });
   }
