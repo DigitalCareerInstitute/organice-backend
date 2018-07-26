@@ -6,39 +6,48 @@
 2.  Run `npm install` in your terminal to get all needed packages.
 3.  Copy **the variables.env.sample** file to **variables.env**.
 4.  Edit the configuration to fit your setup and needs.
-5.  Run `node app.js` ,or through **NODEMON** `nodemon app.js`
+5.  Run `node index.js` ,or through **NODEMON** `nodemon index.js`
 
 ## Routing
 
 ### Registrations and login routes
 
-localhost:8080/api/users/register (post)
+`POST` localhost:8080/api/users/register 
 
-localhost:8080/api/users/login (post)
+`curl -X POST http://localhost:8080/api/register -H "Content-Type: application/json" -d '{"name": "tommyA", "email": "tommy@example.com","password":"password123"}'`
 
-localhost:8080/api/users/reset/:id (post)
+`POST` localhost:8080/api/users/login 
+curl -X POST http://localhost:8080/api/login -H "Content-Type: application/json" -d '{"email": "tommy@example.com","password":"password123"}'` 
 
-#### Protected Routes (returns "yes" if token is valid )
+`POST` localhost:8080/api/users/reset/:id 
+### Protected Routes (returns "yes" if token is valid )
 
 localhost:8080/api/users/delete/:id (delete)
 
-localhost:8080/api/users/edit/:id (post)
-
-localhost:8080/api/users/delete (delete) delete all users
+`POST` localhost:8080/api/users/edit/:id 
+ocalhost:8080/api/users/delete (delete) delete all users
 
 ---
 
 #### Scans
 
-localhost:8080/api/scans/new (create)
+`POST` localhost:8080/api/scans/new
 
-localhost:8080/api/scans/edit/:id
+`POST` localhost:8080/api/scans/edit/:id
 
-localhost:8080/api/scans/delete/:id
+`POST` localhost:8080/api/scans/delete
 
-localhost:8080/api/scans/
+`curl -X POST http://localhost:8080/api/scans/delete -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidG9tbXkiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwiaWQiOiI1YjU2ZGQ5NjUyOWVmMDY5MjFlZTdhYWMiLCJpYXQiOjE1MzI0MTk0NzksImV4cCI6MTUzMjU5MjI3OX0.Tzwe-BQ6qv3u06gYc8q2Su3rMcg_MFC0-8-n3JUG1_c' -H 'Content-Type: application/json' -H "id: 5b56e19a80f548787dec0ba8"`
 
-localhost:8080/api/scans/:id/
+`GET` localhost:8080/api/scans/
+
+
+`curl  http://localhost:8080/api/scans -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidG9tbXkiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwiaWQiOiI1YjU2ZGQ5NjUyOWVmMDY5MjFlZTdhYWMiLCJpYXQiOjE1MzI0MTk0NzksImV4cCI6MTUzMjU5MjI3OX0.Tzwe-BQ6qv3u06gYc8q2Su3rMcg_MFC0-8-n3JUG1_c'`
+
+`GET` localhost:8080/api/scans/:id/
+
+
+`curl -X POST http://localhost:8080/api/scans/add -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidG9tbXkiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwiaWQiOiI1YjU2ZGQ5NjUyOWVmMDY5MjFlZTdhYWMiLCJpYXQiOjE1MzI0MTk0NzksImV4cCI6MTUzMjU5MjI3OX0.Tzwe-BQ6qv3u06gYc8q2Su3rMcg_MFC0-8-n3JUG1_c' -H 'Content-Type: application/json' -d '{"category": "finance", "title": "IHK", "image": "https://www.w3schools.com/w3css/img_lights.jpg", "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore", "date": "1544832000"}'`
 
 ---
 

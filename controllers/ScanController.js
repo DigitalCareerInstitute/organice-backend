@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Scan = require("../models/Scan");
-const User = require("../models/User");
 
 exports.getScans = async (req, res, next) => {
   try {
@@ -58,7 +57,6 @@ exports.createScan = async (req, res, next) => {
     return;
   }
   const scan = await new Scan(scanObject).save();
-  console.log(`Successfully created "${scan.title}"`);
   res.json({
     code: 200,
     message: `Successfully created '${scan.title}'`,
