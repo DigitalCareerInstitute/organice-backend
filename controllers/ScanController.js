@@ -2,11 +2,61 @@ const mongoose = require("mongoose");
 const Scan = require("../models/Scan");
 const User = require("../models/User");
 
-exports.createScan = async (req, res) => {
+exports.getScans = async (req, res, next) => {
+  try {
+    const scans = await Scan.find({ user: req.user._id });
+    res.json({
+      code: 200,
+      message: `All scans`,
+      scans: scans
+    });
+  } catch (err) {
+    console.log(err);
+    res.json({
+      code: 404,
+      message: `No scans were found`
+    });
+  }
+  next();
+};
+
+exports.getSingleScan = async (req, res, next) => {
+  try {
+    const scan = await Scan.findOne();
+    res.json({
+      code: 200,
+      message: `All scans`,
+      scans: scans
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.createScan = async (req, res, next) => {
   let scanObject = {
     user: req.user._id,
-    title: req.body.title
+    title: req.body.title,
+    category: req.body.category,
+    image: req.body.image,
+    content: req.body.content,
+    date: req.body.date
   };
+
+  const foundScan = await Scan.findOne(
+    { title: req.body.title },
+    req.body
+  ).exec();
+
+  if (foundScan) {
+    res.json({
+      code: 401,
+      message: "This scan is already existed , Please choose another name"
+    });
+    console.log(`This scan is already existed , Please choose another name`);
+    next();
+    return;
+  }
   const scan = await new Scan(scanObject).save();
   console.log(`Successfully created "${scan.title}"`);
   res.json({
@@ -16,7 +66,11 @@ exports.createScan = async (req, res) => {
       user_name: req.user.name,
       user_id: req.user._id,
       scan_title: req.body.title,
-      scan_id: scan._id
+      scan_id: scan._id,
+      scan_category: req.body.category,
+      image: req.body.image,
+      content: req.body.content,
+      date: req.body.date
     }
   });
 };
@@ -29,30 +83,35 @@ const confirmOwner = (scan, user) => {
   }
 };
 
-exports.createScanOld = async (req, res) => {
-  const scan = await new Scan(req.body).save();
-  console.log(`Successfully created '${scan.title}'`);
-  res.json({
-    code: 200,
-    message: `Successfully created '${scan.title}'`,
-    scan: {
-      title: req.body.title
+exports.updateScan = async (req, res, next) => {
+  try {
+    const scan = await Scan.findOne({ _id: req.params.id }).exec();
+    // console.log("===================FOUND SCAN===============================");
+    // console.log(foundScan);
+    if (scan.title === req.body.title) {
+      res.json({
+        code: 401,
+        message: "This scan is already existed , Please choose another name"
+      });
+      console.log(`Please choose another name`);
+      next(false);
+      return;
     }
-  });
-};
-
-exports.updateScan = async (req, res) => {
-  const scan = await Scan.findOneAndUpdate({ _id: req.params.id }, req.body, {
-    new: true,
-    runValidators: true
-  }).exec();
-  if (!scan) {
+  } catch {
+    console.log("NOT FOUND ");
     res.json(404, {
       code: 404,
       message: "scan not found"
     });
     next(false);
+    return;
   }
+
+  const scan = await Scan.findOneAndUpdate({ _id: req.params.id }, req.body, {
+    new: true,
+    runValidators: true
+  }).exec();
+
   console.log(scan);
   console.log(`Successfully updated '${scan.title}'`);
   res.json({
@@ -62,36 +121,60 @@ exports.updateScan = async (req, res) => {
       user_name: req.user.name,
       user_id: req.user._id,
       scan_title: req.body.title,
-      scan_id: scan._id
+      scan_id: scan._id,
+      scan_category: req.body.category,
+      image: req.body.image,
+      content: req.body.content,
+      date: req.body.date
     }
   });
 };
 
-exports.deleteScan = async (req, res) => {
-  const scan = await Scan.findOne({ _id: req.params.id });
-  console.log("=============scan=============");
-  console.log(scan);
+exports.deleteScan = async (req, res, next) => {
+  try {
+    const scan = await Scan.findOne({ _id: req.params.id });
 
-  if (scan === null) {
+    if (!scan) {
+      res.json({
+        code: 404,
+        message: `Scan not found`
+      });
+      next(false);
+      return;
+    }
+  } catch (message) {
     res.json({
       code: 404,
-      message: `Scan not found`
+      message: "Scan not found "
     });
-    return;
   }
 
-  if (req.params.id === scan.id) {
-    scan.remove(function(err) {
-      if (err) throw err;
+  try {
+    const scan = await Scan.findOne({ _id: req.params.id });
+
+    if (req.params.id === scan.id) {
+      console.log("=============scan=============");
+      console.log(scan);
+      scan.remove();
+
       console.log(`Successfully removed`);
       res.json({
         code: 200,
         message: `Successfully removed`
-        // ser_name: req.user.name,
-        // user_id: req.user._id,
-        // scan_title: req.body.title,
-        // scan_id: scan._id
       });
+    }
+  } catch (message) {
+    res.json({
+      code: 403,
+      message: "ERROR"
     });
   }
+};
+
+exports.deleteAllScans = async (req, res, next) => {
+  Scan.remove({}, function(err) {
+    console.log("All SCANS are removed");
+    res.send("Successfully deleted all SCANS");
+    next();
+  });
 };

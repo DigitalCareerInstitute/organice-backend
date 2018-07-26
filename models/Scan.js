@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const mongodbErrorHandler = require("mongoose-mongodb-errors");
 
 const scanSchema = new mongoose.Schema({
   user: {
@@ -11,10 +12,14 @@ const scanSchema = new mongoose.Schema({
   //   ref: "Category",
   //   required: "Category ID is needed"
   // },
+  category: {
+    type: String
+  },
   title: {
     type: String,
     trim: true,
-    required: "You must provide a name"
+    required: "You must provide a name",
+    unique: true
   },
   image: {
     type: String,
@@ -35,5 +40,7 @@ const scanSchema = new mongoose.Schema({
   //   content:
   //   }
 });
+
+scanSchema.plugin(mongodbErrorHandler);
 
 module.exports = mongoose.model("Scan", scanSchema);

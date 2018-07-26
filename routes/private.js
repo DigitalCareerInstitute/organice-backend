@@ -19,9 +19,7 @@ router.post(
   AuthController.updatePassword
 );
 // SCANS
-router.get("/scans", function(req, res) {
-  res.send("SCANS");
-});
+router.get("/scans", passportAuthenticate, ScanController.getScans);
 
 router.post("/scans/add", passportAuthenticate, ScanController.createScan);
 

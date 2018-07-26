@@ -9,46 +9,6 @@ const bcrypt = require("bcrypt");
 const bcryptNodeJs = require("bcrypt-nodejs");
 
 const userSchema = new mongoose.Schema({
-  // local: {
-  //   name: {
-  //     type: String,
-  //     trim: true,
-  //     required: "You must supply a user name",
-  //     unique: true
-  //   },
-  //   email: {
-  //     type: String,
-  //     unique: true,
-  //     lowercase: true,
-  //     trim: true,
-  //     required: "Please supply an email address",
-  //     validate: [validator.isEmail, "Invalid email address"]
-  //   },
-  //   password: {
-  //     type: String,
-  //     trim: true,
-  //     required: " You must supply a password"
-  //   }
-  // },
-  // facebook: {
-  //   id: String,
-  //   token: String,
-  //   name: String,
-  //   email: String
-  // },
-  // twitter: {
-  //   id: String,
-  //   token: String,
-  //   displayName: String,
-  //   username: String
-  // },
-  // google: {
-  //   id: String,
-  //   token: String,
-  //   email: String,
-  //   name: String
-  // },
-  // avatar: String /* optional for the moment*/,
   name: {
     type: String,
     trim: true,
@@ -68,6 +28,7 @@ const userSchema = new mongoose.Schema({
     trim: true,
     unique: true
   },
+  avatar: String /* optional for the moment*/,
   resetPasswordToken: String,
   resetPasswordExpires: Date
 });
@@ -88,7 +49,7 @@ const userSchema = new mongoose.Schema({
 //  return `https://gravatar.com/avatar/${hash}?s=200`
 // });
 
-/* Settings for passport local mongoose  */
+/* Settings for passport-local-mongoose  */
 
 userSchema.plugin(passportLocalMongoose, { usernameField: "email" });
 userSchema.plugin(mongodbErrorHandler);
