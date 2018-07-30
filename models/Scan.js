@@ -1,20 +1,25 @@
 const mongoose = require("mongoose");
 const mongodbErrorHandler = require("mongoose-mongodb-errors");
-
+const categoryModel = require("./Category");
 const scanSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
     required: "user ID is needed"
   },
+  category: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "Category"
+    }
+  ],
   // category: {
   //   type: mongoose.Schema.ObjectId,
-  //   ref: "Category",
-  //   required: "Category ID is needed"
+  //   ref: "Category"
   // },
-  category: {
-    type: String
-  },
+  // category: {
+  //   type: String
+  // },
   title: {
     type: String,
     trim: true,

@@ -37,10 +37,14 @@ exports.createScan = async (req, res, next) => {
     user: req.user._id,
     title: req.body.title,
     category: req.body.category,
+    // category: req.headers.id,
     image: req.body.image,
     content: req.body.content,
     date: req.body.date
   };
+
+  console.log("SCAN OBJECT");
+  console.log(scanObject);
 
   const foundScan = await Scan.findOne(
     { title: req.body.title },

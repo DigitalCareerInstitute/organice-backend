@@ -13,8 +13,8 @@ const categorySchema = new mongoose.Schema({
   },
   icon: {
     type: String,
-    trim: true,
-    required: "You must provide an icon"
+    trim: true
+    // required: "You must provide an icon"
   }
 });
 

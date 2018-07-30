@@ -5,6 +5,7 @@ const passportAuthenticate = passport.authenticate("jwt", { session: false });
 
 const AuthController = require("../controllers/AuthController");
 const ScanController = require("../controllers/ScanController");
+const CategoryController = require("../controllers/CategoryController");
 
 // USER ROUTES
 router.post("/users/update", passportAuthenticate, AuthController.updateUser);
@@ -34,6 +35,32 @@ router.post(
   "/scans/:id/delete",
   passportAuthenticate,
   ScanController.deleteScan
+);
+
+// CATEGORY ROUTES
+
+router.get(
+  "/categories",
+  passportAuthenticate,
+  CategoryController.getCategories
+);
+
+router.post(
+  "/categories/add",
+  passportAuthenticate,
+  CategoryController.createCategory
+);
+
+router.post(
+  "/categories/:id/update",
+  passportAuthenticate,
+  CategoryController.updateCategory
+);
+
+router.post(
+  "/categories/:id/delete",
+  passportAuthenticate,
+  CategoryController.deleteCategory
 );
 
 module.exports = router;
