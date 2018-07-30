@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 mongoose.Promise = global.Promise;
 const md5 = require("md5");
-// const isEmail = require("validator/lib/isEmail");
 const validator = require("validator");
 const mongodbErrorHandler = require("mongoose-mongodb-errors");
 const passportLocalMongoose = require("passport-local-mongoose");

@@ -6,6 +6,7 @@ const passportAuthenticate = passport.authenticate("jwt", { session: false });
 const AuthController = require("../controllers/AuthController");
 const ScanController = require("../controllers/ScanController");
 
+// USER ROUTES
 router.post("/users/update", passportAuthenticate, AuthController.updateUser);
 router.post("/users/logout", passportAuthenticate, AuthController.logout);
 router.post(
@@ -14,6 +15,7 @@ router.post(
   AuthController.updatePassword
 );
 
+// SCAN ROUTES
 router.get("/scans", passportAuthenticate, ScanController.getScans);
 
 router.post("/scans/add", passportAuthenticate, ScanController.createScan);

@@ -27,10 +27,10 @@ exports.register = async (req, res, next) => {
           email: user.email,
           id: user._id
         },
-        process.env.JWTSECRET,
-        {
-          expiresIn: "365d"
-        }
+        process.env.JWTSECRET
+        // {
+        //   expiresIn: "365d"
+        // }
       );
 
       console.log(jwtToken);

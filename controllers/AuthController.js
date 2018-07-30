@@ -44,7 +44,6 @@ exports.isLoggedIn = (req, res, next) => {
 };
 
 exports.login = (req, res, next) => {
-  // console.log(req);
   passport.authenticate("local", { session: false }, (err, user, info) => {
     if (err) {
       return next(err);
@@ -57,20 +56,7 @@ exports.login = (req, res, next) => {
       });
     }
     if (user) {
-      const JWTToken = jwt.sign(
-        {
-          // name: user.name,
-          email: user.email,
-          id: user._id
-        },
-        process.env.JWTSECRET,
-        {
-          expiresIn: "365d"
-        }
-      );
-      User.findByIdAndUpdate({ _id: user._id }, { token: JWTToken }).exec();
-
-      console.log("---------user--------------");
+      console.log("---------Logged in user--------------");
       console.log(user);
       res.json({
         code: 200,
@@ -79,7 +65,7 @@ exports.login = (req, res, next) => {
           name: user.name,
           email: user.email,
           id: user._id,
-          token: JWTToken
+          token: user.token
         }
       });
     }
@@ -87,8 +73,8 @@ exports.login = (req, res, next) => {
       if (err) {
         return next(err);
       }
-      console.log("api/users/" + user._id + "/scans");
-      // return res.redirect("api/users/" + user._id + "/scans");
+      console.log("api/users/scans");
+      res.redirect("api/users/scans", next);
     });
   })(req, res, next);
 };
@@ -99,7 +85,7 @@ exports.updateUser = async (req, res, next) => {
     runValidators: true
   }).exec();
   // console.log(req.headers);
-  console.log("===============user=============");
+  console.log("------------Updated user--------------");
   console.log(user);
   if (!user) {
     res.json(404, {
@@ -121,8 +107,6 @@ exports.updateUser = async (req, res, next) => {
 };
 
 exports.updatePassword = async (req, res, next) => {
-  console.log("=============update-password===================");
-
   const user = req.user;
 
   if (!user) {
@@ -138,7 +122,7 @@ exports.updatePassword = async (req, res, next) => {
   user.resetPasswordToken = undefined;
   user.resetPasswordExpires = undefined;
   const updatedUser = await user.save();
-  console.log("==================updated USer===============");
+  console.log("------------Updated user--------------");
   console.log(updatedUser);
   res.json({
     code: 200,
@@ -155,7 +139,7 @@ exports.updatePassword = async (req, res, next) => {
 };
 
 exports.logout = (req, res, next) => {
-  console.log("====================logout-user===================");
+  console.log("------------Logged out user--------------");
   console.log(req.user);
   req.logout();
 
