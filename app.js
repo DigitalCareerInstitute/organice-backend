@@ -8,8 +8,9 @@ const expressValidator = require("express-validator");
 const restifyValidator = require("restify-validator");
 const errorHandlers = require("./handlers/errorHandlers");
 const JWTAuthenticatedUser = require("./handlers/JWTAuthenticatedUser");
+const path = require("path");
 require("./handlers/passport");
-require("dotenv").config({ path: "variables.env" });
+require('dotenv').config({path: path.join(__dirname + '/.env')});
 //const requireAuth = passport.authenticate("jwt", { session: false });
 
 const routes = {

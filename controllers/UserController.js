@@ -3,8 +3,9 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
 const promisify = require("es6-promisify");
+const path = require("path");
+require('dotenv').config({path: path.join(__dirname + '/.env')});
 require("../handlers/passport");
-require("dotenv").config({ path: "variables.env" });
 
 const LocalStrategy = require("passport-local").Strategy;
 const passportJWT = require("passport-jwt");
