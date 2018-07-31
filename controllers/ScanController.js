@@ -1,17 +1,21 @@
 const mongoose = require("mongoose");
 const Scan = require("../models/Scan");
+const multer = require("multer");
+const jimp = require("jimp");
+const uuid = require("uuid");
+const fs = require("fs");
 
 exports.getScans = async (req, res, next) => {
   try {
     const scans = await Scan.find({ user: req.user._id });
-    res.json({
+    res.json(200, {
       code: 200,
       message: `All scans`,
       scans: scans
     });
   } catch (err) {
     console.log(err);
-    res.json({
+    res.json(404, {
       code: 404,
       message: `No scans were found`
     });
@@ -21,15 +25,85 @@ exports.getScans = async (req, res, next) => {
 
 exports.getSingleScan = async (req, res, next) => {
   try {
-    const scan = await Scan.findOne();
-    res.json({
+    const scan = await Scan.findOne({ _id: req.params.id });
+    res.json(200, {
       code: 200,
-      message: `All scans`,
-      scans: scans
+      message: `Single scan `,
+      scan: scan
     });
   } catch (err) {
-    console.log(err);
+    res.json(404, {
+      code: 404,
+      message: "scan not found"
+    });
+    next(false);
+    return;
   }
+};
+
+const storage = multer.diskStorage({
+  destination: function(req, file, next) {
+    next(null, "../temp");
+  },
+  filename: function(req, file, next) {
+    next(null, uuid(4));
+  }
+});
+
+exports.upload = multer({
+  storage,
+  limits: {
+    fileSize: 10000000 // 10 MB
+  },
+  fileFilter(req, file, next) {
+    const isImage = file.mimetype.startsWith("image/");
+    if (isImage) {
+      next(null, true);
+    } else {
+      next({ message: "That filetype is not allowed!" }, false);
+    }
+  }
+}).single("image");
+
+exports.uploadError = function(error, req, res, next) {
+  if (error) {
+    let message = "Error during file upload. Please try again later.";
+
+    switch (error.code) {
+      case "LIMIT_FILE_SIZE":
+        message = "The file is too large. Max. 10 MB allowed!";
+        break;
+
+      case "FILETYPE_NOT_ALLOWED":
+        message =
+          'The file type is not allowed. Only file types "JPEG, PNG, GIF" allowed!';
+        break;
+    }
+
+    // req.flash("danger", message);
+    return res.json(422, {
+      code: 422,
+      message
+    });
+  }
+  next();
+};
+
+exports.resize = async (req, res, next) => {
+  if (!req.file) {
+    next();
+    return;
+  }
+  console.log(req.body);
+  const extension = req.file.mimetype.split("/")[1];
+  req.body.image = `${uuid.v4()}.${extension}`;
+
+  const image = await jimp.read(req.file.path);
+  await image.cover(350, 180);
+  await image.write(`./temp/uploads/scans/${req.body.image}`);
+  fs.unlinkSync(req.file.path);
+
+  next();
 };
 
 exports.createScan = async (req, res, next) => {
@@ -37,51 +111,50 @@ exports.createScan = async (req, res, next) => {
     user: req.user._id,
     title: req.body.title,
     category: req.body.category,
-    // category: req.headers.id,
     image: req.body.image,
     content: req.body.content,
     date: req.body.date
   };
 
-  console.log("SCAN OBJECT");
+  console.log("+++++++++++++++++SCAN OBJECT++++++++++++++++++");
   console.log(scanObject);
 
-  const foundScan = await Scan.findOne(
-    { title: req.body.title },
-    req.body
-  ).exec();
+  try {
+    const foundScan = await Scan.findOne(
+      { title: req.body.title },
+      req.body
+    ).exec();
 
-  if (foundScan) {
-    res.json({
-      code: 401,
-      message: "This scan is already existed , Please choose another name"
-    });
-    console.log(`This scan is already existed , Please choose another name`);
-    next();
-    return;
-  }
-  const scan = await new Scan(scanObject).save();
-  res.json({
-    code: 200,
-    message: `Successfully created '${scan.title}'`,
-    scan: {
-      user_name: req.user.name,
-      user_id: req.user._id,
-      scan_title: req.body.title,
-      scan_id: scan._id,
-      scan_category: req.body.category,
-      image: req.body.image,
-      content: req.body.content,
-      date: req.body.date
+    if (foundScan) {
+      res.json(401, {
+        code: 401,
+        message: "This scan is already existed , Please choose another name"
+      });
+      console.log(`This scan is already existed , Please choose another name`);
+      next();
+      return;
     }
-  });
-};
-
-// Display form for editing a project
-
-const confirmOwner = (scan, user) => {
-  if (!scan.user.equals(user._id)) {
-    throw Error("You must own a scan in order to edit it!");
+    const scan = await new Scan(scanObject).save();
+    res.json(200, {
+      code: 200,
+      message: `Successfully created '${scan.title}'`,
+      scan: {
+        user_name: req.user.name,
+        user_id: req.user._id,
+        scan_title: req.body.title,
+        scan_id: scan._id,
+        scan_category: req.body.category,
+        image: req.body.image,
+        content: req.body.content,
+        date: req.body.date
+      }
+    });
+  } catch (err) {
+    console.log(err);
+    res.json(422, {
+      code: 422,
+      message: "Unprocessable entity"
+    });
   }
 };
 
@@ -91,7 +164,7 @@ exports.updateScan = async (req, res, next) => {
     // console.log("===================FOUND SCAN===============================");
     // console.log(foundScan);
     if (scan.title === req.body.title) {
-      res.json({
+      res.json(401, {
         code: 401,
         message: "This scan is already existed , Please choose another name"
       });
@@ -109,27 +182,35 @@ exports.updateScan = async (req, res, next) => {
     return;
   }
 
-  const scan = await Scan.findOneAndUpdate({ _id: req.params.id }, req.body, {
-    new: true,
-    runValidators: true
-  }).exec();
+  try {
+    const scan = await Scan.findOneAndUpdate({ _id: req.params.id }, req.body, {
+      new: true,
+      runValidators: true
+    }).exec();
 
-  console.log(scan);
-  console.log(`Successfully updated '${scan.title}'`);
-  res.json({
-    code: 200,
-    message: `Successfully updated '${scan.title}'`,
-    scan: {
-      user_name: req.user.name,
-      user_id: req.user._id,
-      scan_title: req.body.title,
-      scan_id: scan._id,
-      scan_category: req.body.category,
-      image: req.body.image,
-      content: req.body.content,
-      date: req.body.date
-    }
-  });
+    console.log(scan);
+    console.log(`Successfully updated to: '${scan.title}'`);
+    res.json(200, {
+      code: 200,
+      message: `Successfully updated to: '${scan.title}'`,
+      scan: {
+        user_name: req.user.name,
+        user_id: req.user._id,
+        scan_title: req.body.title,
+        scan_id: scan._id,
+        scan_category: req.body.category,
+        image: req.body.image,
+        content: req.body.content,
+        date: req.body.date
+      }
+    });
+  } catch (err) {
+    console.log(err);
+    res.json(422, {
+      code: 422,
+      message: "Unprocessable entity"
+    });
+  }
 };
 
 exports.deleteScan = async (req, res, next) => {
@@ -137,7 +218,7 @@ exports.deleteScan = async (req, res, next) => {
     const scan = await Scan.findOne({ _id: req.params.id });
 
     if (!scan) {
-      res.json({
+      res.json(404, {
         code: 404,
         message: `Scan not found`
       });
@@ -145,7 +226,7 @@ exports.deleteScan = async (req, res, next) => {
       return;
     }
   } catch (message) {
-    res.json({
+    res.json(404, {
       code: 404,
       message: "Scan not found "
     });
@@ -160,15 +241,15 @@ exports.deleteScan = async (req, res, next) => {
       scan.remove();
 
       console.log(`Successfully removed`);
-      res.json({
+      res.json(200, {
         code: 200,
         message: `Successfully removed`
       });
     }
   } catch (message) {
-    res.json({
+    res.json(403, {
       code: 403,
-      message: "ERROR"
+      message: "ERROR FORBIDDEN"
     });
   }
 };

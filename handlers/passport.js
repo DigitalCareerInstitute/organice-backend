@@ -24,13 +24,13 @@ passport.use(
     function(req, jwtPayload, cb) {
       return User.findById(jwtPayload.id)
         .then(user => {
-          console.log("Found user by Token :");
-          console.log(user);
+          // console.log("Found user by Token :");
+          // console.log(user);
           return cb(null, user);
         })
         .catch(err => {
-          console.log("did not find user");
-          console.log(err);
+          // console.log("did not find user");
+          // console.log(err);
           return cb(err);
         });
     }

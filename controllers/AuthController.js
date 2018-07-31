@@ -35,7 +35,7 @@ exports.isLoggedIn = (req, res, next) => {
     next();
     return;
   }
-  res.json({
+  res.json(403, {
     code: 403,
     message: "You must login first!!"
   });
@@ -48,17 +48,21 @@ exports.login = (req, res, next) => {
     if (err) {
       return next(err);
     }
+
     if (!user) {
-      res.json(401, {
+      return res.json(401, {
         code: 401,
         message: "Invalid Email or password",
         user
       });
     }
-    if (user) {
-      console.log("---------Logged in user--------------");
-      console.log(user);
-      res.json({
+
+    req.logIn(user, { session: false }, err => {
+      if (err) {
+        return next(err);
+      }
+
+      return res.json(200, {
         code: 200,
         message: `Welcome to OrgaNice '${user.name}'`,
         user: {
@@ -68,88 +72,99 @@ exports.login = (req, res, next) => {
           token: user.token
         }
       });
-    }
-    req.logIn(user, { session: false }, err => {
-      if (err) {
-        return next(err);
-      }
-      console.log("api/users/scans");
-      res.redirect("api/users/scans", next);
     });
-  })(req, res, next);
-};
+  })(req, res, next); // Authenticate
+}; // Exports login
 
 exports.updateUser = async (req, res, next) => {
-  const user = await User.findOneAndUpdate({ _id: req.user._id }, req.body, {
-    new: true,
-    runValidators: true
-  }).exec();
-  // console.log(req.headers);
-  console.log("------------Updated user--------------");
-  console.log(user);
-  if (!user) {
-    res.json(404, {
-      code: 404,
-      message: "user not found"
-    });
-    next(false);
-  }
-  res.json({
-    code: 200,
-    message: `Successfully updated '${user.name}'`,
-    user: {
-      name: req.body.name,
-      email: req.body.email,
-      id: user._id,
-      token: user.token
+  try {
+    const user = await User.findOneAndUpdate({ _id: req.user._id }, req.body, {
+      new: true,
+      runValidators: true
+    }).exec();
+    // console.log(req.headers);
+    console.log("------------Updated user--------------");
+    console.log(user);
+    if (!user) {
+      res.json(404, {
+        code: 404,
+        message: "user not found"
+      });
+      next(false);
     }
-  });
+    res.json(200, {
+      code: 200,
+      message: `Successfully updated to: '${user.name}'`,
+      user: {
+        name: req.body.name,
+        email: req.body.email,
+        id: user._id,
+        token: user.token
+      }
+    });
+  } catch (err) {
+    console.log(err);
+    res.json(422, {
+      code: 422,
+      message: "Unprocessable entity"
+    });
+  }
 };
 
 exports.updatePassword = async (req, res, next) => {
   const user = req.user;
 
   if (!user) {
-    res.json({
+    res.json(403, {
       code: 403,
       message: "Password reset is invalid or has expired."
     });
   }
 
-  const setPassword = promisify(user.setPassword, user);
-  await setPassword(req.body.password);
+  try {
+    const setPassword = promisify(user.setPassword, user);
+    await setPassword(req.body.password);
 
-  user.resetPasswordToken = undefined;
-  user.resetPasswordExpires = undefined;
-  const updatedUser = await user.save();
-  console.log("------------Updated user--------------");
-  console.log(updatedUser);
-  res.json({
-    code: 200,
-    message: `Password successfully updated for user '${user.name}'`,
-    user: {
-      id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-
-      token: updatedUser.token,
-      hash: updatedUser.hash
-    }
-  });
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    const updatedUser = await user.save();
+    console.log("------------Updated user--------------");
+    console.log(updatedUser);
+    res.json(200, {
+      code: 200,
+      message: `Password successfully updated for user '${user.name}'`,
+      user: {
+        id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        token: updatedUser.token,
+        hash: updatedUser.hash
+      }
+    });
+  } catch (err) {
+    console.log(err);
+    res.json(422, {
+      code: 422,
+      message: "Unprocessable entity"
+    });
+  }
 };
 
 exports.logout = (req, res, next) => {
-  console.log("------------Logged out user--------------");
-  console.log(req.user);
-  req.logout();
-
-  // const test = User.findById({ id: user._id });
-  // console.log(test);
-  // const test2 = User.findById(jwtPayload.id);
-  // console.log(test2);
-  res.json({
-    message: "successfully logged out"
-  });
+  try {
+    console.log("------------Logged out user--------------");
+    req.logout();
+    res.json(200, {
+      code: 200,
+      message: "successfully logged out"
+    });
+  } catch (err) {
+    console.log(err);
+    res.json(422, {
+      code: 422,
+      message: "Unprocessable entity"
+    });
+  }
   next();
 };
 

@@ -19,11 +19,16 @@ router.post(
 // SCAN ROUTES
 router.get("/scans", passportAuthenticate, ScanController.getScans);
 
-router.post("/scans/add", passportAuthenticate, ScanController.createScan);
+router.get("/scans/:id", passportAuthenticate, ScanController.getSingleScan);
 
-router.get("/scans/:id", function(req, res) {
-  res.send("SINGLE ONE");
-});
+router.post(
+  "/scans/add",
+  passportAuthenticate,
+  // ScanController.upload,
+  // ScanController.uploadError,
+  // ScanController.resize,
+  ScanController.createScan
+);
 
 router.post(
   "/scans/:id/update",

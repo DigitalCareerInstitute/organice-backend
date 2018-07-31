@@ -1,17 +1,18 @@
 const mongoose = require("mongoose");
 const Category = require("../models/Category");
+const ScanSchema = require("../models/Scan");
 
 exports.getCategories = async (req, res, next) => {
   try {
     const categories = await Category.find({ user: req.user._id });
-    res.json({
+    res.json(200, {
       code: 200,
       message: `All categories`,
       categories: categories
     });
   } catch (err) {
     console.log(err);
-    res.json({
+    res.json(404, {
       code: 404,
       message: `No categories were found`
     });
@@ -32,7 +33,7 @@ exports.createCategory = async (req, res, next) => {
   // ).exec();
 
   // if (foundCategory) {
-  //   res.json({
+  //   res.json(401,{
   //     code: 401,
   //     message: "This category is already existed , Please choose another name"
   //   });
@@ -42,18 +43,26 @@ exports.createCategory = async (req, res, next) => {
   //   next();
   //   return;
   // }
-  const category = await new Category(categoryObject).save();
-  res.json({
-    code: 200,
-    message: `Successfully created '${category.title}'`,
-    category: {
-      user_name: req.user.name,
-      user_id: req.user._id,
-      category_title: req.body.title,
-      category_id: category._id
-      // icon: req.body.icon
-    }
-  });
+  try {
+    const category = await new Category(categoryObject).save();
+    res.json(200, {
+      code: 200,
+      message: `Successfully created '${category.title}'`,
+      category: {
+        user_name: req.user.name,
+        user_id: req.user._id,
+        category_title: req.body.title,
+        category_id: category._id
+        // icon: req.body.icon
+      }
+    });
+  } catch (err) {
+    console.log(err);
+    res.json(422, {
+      code: 422,
+      message: "Unprocessable entity"
+    });
+  }
 };
 
 exports.updateCategory = async (req, res, next) => {
@@ -67,10 +76,10 @@ exports.updateCategory = async (req, res, next) => {
       }
     ).exec();
     console.log(category);
-    console.log(`Successfully updated '${category.title}'`);
-    res.json({
+    console.log(`Successfully updated to: '${category.title}'`);
+    res.json(200, {
       code: 200,
-      message: `Successfully updated '${category.title}'`,
+      message: `Successfully updated to: '${category.title}'`,
       scan: {
         user_name: req.user.name,
         user_id: req.user._id,
@@ -94,7 +103,7 @@ exports.deleteCategory = async (req, res, next) => {
     const category = await Category.findOne({ _id: req.params.id });
 
     if (!category) {
-      res.json({
+      res.json(404, {
         code: 404,
         message: `Category not found`
       });
@@ -102,7 +111,7 @@ exports.deleteCategory = async (req, res, next) => {
       return;
     }
   } catch (message) {
-    res.json({
+    res.json(404, {
       code: 404,
       message: "Category not found "
     });
@@ -117,15 +126,15 @@ exports.deleteCategory = async (req, res, next) => {
       category.remove();
 
       console.log(`Successfully removed`);
-      res.json({
+      res.json(200, {
         code: 200,
         message: `Successfully removed`
       });
     }
   } catch (message) {
-    res.json({
+    res.json(403, {
       code: 403,
-      message: "ERROR"
+      message: "ERROR FORBIDDEN"
     });
   }
 };

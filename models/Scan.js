@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const mongodbErrorHandler = require("mongoose-mongodb-errors");
 const categoryModel = require("./Category");
+
 const scanSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.ObjectId,
@@ -23,13 +24,13 @@ const scanSchema = new mongoose.Schema({
   title: {
     type: String,
     trim: true,
-    required: "You must provide a name",
-    unique: true
+    required: "You must provide a name"
+    // unique: true
   },
   image: {
     type: String,
     trim: true
-    // required: "You must provide an icon"
+    // required: "You must provide an image"
     /* image base 64 */
   },
   content: {

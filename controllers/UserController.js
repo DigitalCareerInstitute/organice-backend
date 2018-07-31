@@ -38,7 +38,7 @@ exports.register = async (req, res, next) => {
       user.token = jwtToken;
       user.save();
 
-      res.json({
+      res.json(200, {
         code: 200,
         message: "User registered successfully. Please check the email.",
         user: {
