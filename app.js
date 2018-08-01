@@ -19,6 +19,17 @@ const routes = {
 };
 
 const server = restify.createServer();
+server.use(restify.plugins.bodyParser());
+server.use(restify.plugins.queryParser());
+server.use(restify.plugins.urlEncodedBodyParser());
+
+server.use(
+  function crossOrigin(req,res,next){
+    //TODO Limit cors Access to production domain
+    res.header("Access-Control-Allow-Origin", "*");
+    return next();
+  }
+);
 
 // Require the models
 require("./models/User");
@@ -67,9 +78,7 @@ mongoose
 
 // Restify Server
 
-server.use(restify.plugins.bodyParser());
-server.use(restify.plugins.queryParser());
-server.use(restify.plugins.urlEncodedBodyParser());
+
 // server.use(restifyValidator);
 // server.use(expressValidator());
 
