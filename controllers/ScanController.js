@@ -5,6 +5,8 @@ const jimp = require("jimp");
 const uuid = require("uuid");
 const fs = require("fs");
 
+const FILE_PATH = "./temp/uploads/scans/";
+
 exports.getScans = async (req, res, next) => {
   try {
     const scans = await Scan.find({ user: req.user._id });
@@ -41,31 +43,43 @@ exports.getSingleScan = async (req, res, next) => {
   }
 };
 
-const storage = multer.diskStorage({
-  destination: function(req, file, next) {
-    next(null, "../temp");
-  },
-  filename: function(req, file, next) {
-    next(null, uuid(4));
-  }
-});
+exports.upload = (req, res, next) => {
+  // console.log("++++++++ Multer Req ++++++++");
+  // console.log(req);
 
-exports.upload = multer({
-  storage,
-  limits: {
-    fileSize: 10000000 // 10 MB
-  },
-  fileFilter(req, file, next) {
-    const isImage = file.mimetype.startsWith("image/");
-    if (isImage) {
-      next(null, true);
-    } else {
-      next({ message: "That filetype is not allowed!" }, false);
+  const storage = multer.diskStorage({
+    destination: function(req, file, next) {
+      next(null, "./temp_multer");
+    },
+    filename: function(req, file, next) {
+      next(null, uuid(4));
     }
-  }
-}).single("image");
+  });
+
+  multer({
+    storage,
+    limits: {
+      fileSize: 10000000 // 10 MB
+    },
+    fileFilter(req, file, next) {
+      console.log("++++++++ Multer Req ++++++++");
+      console.log(req);
+      const isImage = file.mimetype.startsWith("image/");
+      console.log(storage);
+      console.log("test-req-multer");
+      console.log(req);
+      if (isImage) {
+        next(null, true);
+      } else {
+        next({ message: "That filetype is not allowed!" }, false);
+      }
+    }
+  }).single("image");
+};
 
 exports.uploadError = function(error, req, res, next) {
+  console.log(req.file);
+
   if (error) {
     let message = "Error during file upload. Please try again later.";
 
@@ -80,7 +94,6 @@ exports.uploadError = function(error, req, res, next) {
         break;
     }
 
-    // req.flash("danger", message);
     return res.json(422, {
       code: 422,
       message
@@ -90,30 +103,74 @@ exports.uploadError = function(error, req, res, next) {
 };
 
 exports.resize = async (req, res, next) => {
-  if (!req.file) {
+  console.log("$$$$", req.files.image.path);
+  if (!req.files) {
     next();
     return;
   }
-  console.log(req.body);
-  const extension = req.file.mimetype.split("/")[1];
-  req.body.image = `${uuid.v4()}.${extension}`;
 
-  const image = await jimp.read(req.file.path);
-  await image.cover(350, 180);
-  await image.write(`./temp/uploads/scans/${req.body.image}`);
-  fs.unlinkSync(req.file.path);
+  const filename = `${uuid.v4()}`;
+  const extension = req.files.image.type.split("/")[1];
+
+  const files = {
+    original: {
+      name: `${filename}.${extension}`,
+      path: FILE_PATH,
+      file: `${FILE_PATH}${filename}.${extension}`
+    },
+    thumbnail: {
+      name: `${filename}-400x400.${extension}`,
+      path: FILE_PATH,
+      file: `${FILE_PATH}${filename}-400x400.${extension}`
+    }
+  };
+
+  // move the original image
+  fs.renameSync(req.files.image.path, files.original.file);
+
+  // create thumbnail
+  const thumbnailImage = await jimp.read(files.original.file);
+  await thumbnailImage.cover(400, 400).quality(70);
+  await thumbnailImage.write(files.thumbnail.file);
+
+  req.image = files.original;
 
   next();
 };
 
 exports.createScan = async (req, res, next) => {
+  // console.log("+++++++++++++++++headersTest++++++++++++++++++");
+  // const headersTest = req.headers;
+  // console.log(headersTest);
+
+  // console.log("+++++++++++++++++paramsTest++++++++++++++++++");
+  // const paramsTest = req.params;
+  // console.log(paramsTest);
+
+  // console.log("+++++++++++++++++bodyTest++++++++++++++++++");
+  // const bodyTest = req._body;
+  // console.log(bodyTest);
+
+  // console.log("+++++++++++++++++filesTst++++++++++++++++++");
+  // const filesTst = req.files.image.name;
+  // console.log(filesTst);
+
+  // let scanObject = {
+  //   user: req.user._id,
+  //   title: req.body.title,
+  //   category: req.body.category,
+  //   image: req.body.image,
+  //   content: req.body.content,
+  //   date: req.body.date
+  // };
+
   let scanObject = {
     user: req.user._id,
-    title: req.body.title,
-    category: req.body.category,
-    image: req.body.image,
-    content: req.body.content,
-    date: req.body.date
+    title: req._body.title,
+    category: req._body.category,
+    image: req.image.name,
+    content: req._body.content,
+    date: req._body.date
   };
 
   console.log("+++++++++++++++++SCAN OBJECT++++++++++++++++++");
@@ -121,7 +178,7 @@ exports.createScan = async (req, res, next) => {
 
   try {
     const foundScan = await Scan.findOne(
-      { title: req.body.title },
+      { title: req._body.title },
       req.body
     ).exec();
 
@@ -131,26 +188,36 @@ exports.createScan = async (req, res, next) => {
         message: "This scan is already existed , Please choose another name"
       });
       console.log(`This scan is already existed , Please choose another name`);
-      next();
+      next(false);
       return;
     }
     const scan = await new Scan(scanObject).save();
     res.json(200, {
       code: 200,
       message: `Successfully created '${scan.title}'`,
+      // scan: {
+      //   user_name: req.user.name,
+      //   user_id: req.user._id,
+      //   scan_title: req.body.title,
+      //   scan_id: scan._id,
+      //   scan_category: req.body.category,
+      //   image: req.body.image,
+      //   content: req.body.content,
+      //   date: req.body.date
+      // }
       scan: {
         user_name: req.user.name,
         user_id: req.user._id,
-        scan_title: req.body.title,
+        scan_title: req._body.title,
         scan_id: scan._id,
-        scan_category: req.body.category,
-        image: req.body.image,
-        content: req.body.content,
-        date: req.body.date
+        scan_category: req._body.category,
+        image: req.image.name,
+        content: req._body.content,
+        date: req._body.date
       }
     });
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     res.json(422, {
       code: 422,
       message: "Unprocessable entity"

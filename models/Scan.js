@@ -24,8 +24,8 @@ const scanSchema = new mongoose.Schema({
   title: {
     type: String,
     trim: true,
-    required: "You must provide a name"
-    // unique: true
+    required: "You must provide a name",
+    unique: true
   },
   image: {
     type: String,
@@ -40,7 +40,7 @@ const scanSchema = new mongoose.Schema({
     /* "long string" includes the text of the image */
   },
   date: {
-    type: Date
+    type: Number
   }
   // date_from_scan : {
   //   content:

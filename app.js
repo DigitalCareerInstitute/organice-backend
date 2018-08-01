@@ -69,6 +69,7 @@ mongoose
 
 server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
+server.use(restify.plugins.urlEncodedBodyParser());
 // server.use(restifyValidator);
 // server.use(expressValidator());
 

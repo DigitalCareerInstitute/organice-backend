@@ -25,8 +25,8 @@ router.post(
   "/scans/add",
   passportAuthenticate,
   // ScanController.upload,
-  // ScanController.uploadError,
-  // ScanController.resize,
+  // ScanController.uploadError
+  ScanController.resize,
   ScanController.createScan
 );
 
