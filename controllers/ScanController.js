@@ -4,7 +4,8 @@ const multer = require("multer");
 const jimp = require("jimp");
 const uuid = require("uuid");
 const fs = require("fs");
-
+const path = require("path");
+const { createRecursiveFolderPath } = require('../handlers/helpers')
 const FILE_PATH = "./temp/uploads/scans/";
 
 exports.getScans = async (req, res, next) => {
@@ -125,6 +126,7 @@ exports.resize = async (req, res, next) => {
     }
   };
 
+  createRecursiveFolderPath(FILE_PATH);
   // move the original image
   fs.renameSync(req.files.image.path, files.original.file);
 
