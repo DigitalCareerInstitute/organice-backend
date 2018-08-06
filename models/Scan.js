@@ -41,7 +41,10 @@ const scanSchema = new mongoose.Schema({
   },
   date: {
     type: Number
-  }
+  },
+  recognizedText: {
+    type: mongoose.Schema.Types.Mixed
+  },
   // date_from_scan : {
   //   content:
   //   }

@@ -6,7 +6,7 @@ require("../handlers/passport");
 // const User = mongoose.model("User");
 const promisify = require("es6-promisify");
 const User = require("../models/User");
-const { IsJsonString } = require('../handlers/helpers')
+const { isJsonString } = require('../handlers/helpers')
 require("../handlers/passport");
 
 exports.validateRegister = (req, res, next) => {
@@ -45,7 +45,7 @@ exports.isLoggedIn = (req, res, next) => {
 };
 
 exports.login = (req, res, next) => {
-  if( IsJsonString(req.body) ) {
+  if( isJsonString(req.body) ) {
     req.body = JSON.parse( req.body )
   }
   passport.authenticate("local", { session: false }, (err, user, info) => {

@@ -30,6 +30,7 @@ router.post(
   // ScanController.upload,
   // ScanController.uploadError
   ScanController.resize,
+  ScanController.recognizeText,
   ScanController.createScan
 );
 

@@ -1,10 +1,13 @@
+const {parse, stringify} = require('flatted/cjs');
 const mongoose = require("mongoose");
 const Scan = require("../models/Scan");
 const multer = require("multer");
 const jimp = require("jimp");
 const uuid = require("uuid");
 const fs = require("fs");
-
+const path = require("path");
+const Tesseract = require('tesseract.js')
+const { createRecursiveFolderPath } = require('../handlers/helpers')
 const FILE_PATH = "./temp/uploads/scans/";
 
 exports.getScans = async (req, res, next) => {
@@ -106,7 +109,6 @@ exports.uploadError = function(error, req, res, next) {
 };
 
 exports.resize = async (req, res, next) => {
-  // console.log("$$$$", req.files.image.path);
   if (!req.files.image) {
     return res.json(404, {
       code: 404,
@@ -131,6 +133,8 @@ exports.resize = async (req, res, next) => {
     }
   };
 
+  createRecursiveFolderPath(FILE_PATH);
+
   // move the original image
   fs.renameSync(req.files.image.path, files.original.file);
 
@@ -144,43 +148,26 @@ exports.resize = async (req, res, next) => {
   next();
 };
 
+exports.recognizeText = async (req, res, next) => {
+  
+  const tesseract = Tesseract.create({
+    workerPath: path.join(__dirname, '../tesseract/src/node/worker.js'),
+    langPath: path.join(__dirname, '../tesseract/langs/'),
+    corePath: path.join(__dirname, '../tesseract/src/index.js')
+  })
+    
+  tesseract.recognize(req.image.file)
+  .progress(function(message){
+    console.log(message)
+  })
+    .then(function (result) {
+      req.recognizedText = result
+      next();
+    })
+    .catch(err => console.error(err))
+}
+  
 exports.createScan = async (req, res, next) => {
-  // console.log("+++++++++++++++++headersTest++++++++++++++++++");
-  // const headersTest = req.headers;
-  // console.log(headersTest);
-
-  // console.log("+++++++++++++++++paramsTest++++++++++++++++++");
-  // const paramsTest = req.params;
-  // console.log(paramsTest);
-
-  // console.log("+++++++++++++++++bodyTest++++++++++++++++++");
-  // const bodyTest = req._body;
-  // console.log(bodyTest);
-
-  // console.log("+++++++++++++++++filesTst++++++++++++++++++");
-  // const filesTst = req.files.image.name;
-  // console.log(filesTst);
-
-  // let scanObject = {
-  //   user: req.user._id,
-  //   title: req.body.title,
-  //   category: req.body.category,
-  //   image: req.body.image,
-  //   content: req.body.content,
-  //   date: req.body.date
-  // };
-
-  let scanObject = {
-    user: req.user._id,
-    title: req._body.title,
-    category: req._body.category,
-    image: req.image.name,
-    content: req._body.content,
-    date: req._body.date
-  };
-
-  console.log("+++++++++++++++++SCAN OBJECT++++++++++++++++++");
-  console.log(scanObject);
 
   try {
     const foundScan = await Scan.findOne(
@@ -197,33 +184,34 @@ exports.createScan = async (req, res, next) => {
       next(false);
       return;
     }
+    
+    parsedRecognizedText = JSON.parse(stringify(req.recognizedText));
+    
+    let scanObject = {
+      user: req.user._id,
+      title: req._body.title,
+      category: req._body.category,
+      image: req.image.name,
+      content: req._body.content,
+      date: req._body.date,
+      recognizedText: {
+        text: req.recognizedText.text,
+        html: req.recognizedText.html,
+        confidence: req.recognizedText.confidence,
+        completeData: parsedRecognizedText
+      },
+    };
+
     const scan = await new Scan(scanObject).save();
+
     res.json(200, {
       code: 200,
       message: `Successfully created '${scan.title}'`,
-      // scan: {
-      //   user_name: req.user.name,
-      //   user_id: req.user._id,
-      //   scan_title: req.body.title,
-      //   scan_id: scan._id,
-      //   scan_category: req.body.category,
-      //   image: req.body.image,
-      //   content: req.body.content,
-      //   date: req.body.date
-      // }
-      scan: {
-        user_name: req.user.name,
-        user_id: req.user._id,
-        scan_title: req._body.title,
-        scan_id: scan._id,
-        scan_category: req._body.category,
-        image: req.image.name,
-        content: req._body.content,
-        date: req._body.date
-      }
+      scan: scanObject
     });
+
   } catch (err) {
-    // console.log(err);
+    console.log(err);
     res.json(422, {
       code: 422,
       message: "Unprocessable entity"
