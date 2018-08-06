@@ -195,28 +195,17 @@ exports.createScan = async (req, res, next) => {
         completeData: parsedRecognizedText
       },
     };
+
     const scan = await new Scan(scanObject).save();
 
-    console.log('###', scan);
-    
     res.json(200, {
       code: 200,
       message: `Successfully created '${scan.title}'`,
-      scan: {
-        user_name: req.user.name,
-        user_id: req.user._id,
-        scan_title: req._body.title,
-        scan_id: scan._id,
-        scan_category: req._body.category,
-        image: req.image.name,
-        content: req._body.content,
-        date: req._body.date,
-        recognizedText: req.recognizedText,
-      }
+      scan: scanObject
     });
 
   } catch (err) {
-    // console.log(err);
+    console.log(err);
     res.json(422, {
       code: 422,
       message: "Unprocessable entity"
