@@ -62,7 +62,9 @@
 
 #### Categories
 
-`POST` localhost:8080/api/categories/
+`GET` localhost:8080/api/categories/
+
+`GET` localhost:8080/api/categories/:id (get single category)
 
 `POST` localhost:8080/api/categories/add (create)
 
@@ -70,10 +72,12 @@
 
 `POST` localhost:8080/api/categories/:id/delete
 
+---
+
 ### Development testing routes
 
-`POST` localhost:8080/api/users/deleteAll (delete) delete all users
+`POST` localhost:8080/api/users/delete-all (delete) delete all users
 
-`POST` localhost:8080/api/scans/deleteAll (delete) delete all scans
+`POST` localhost:8080/api/scans/delete-all (delete) delete all scans
 
-`POST` localhost:8080/api/categories/deleteAll (delete) delete all categories
+`POST` localhost:8080/api/categories/delete-all (delete) delete all categories

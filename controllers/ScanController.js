@@ -8,35 +8,38 @@ const fs = require("fs");
 const FILE_PATH = "./temp/uploads/scans/";
 
 exports.getScans = async (req, res, next) => {
+  const user = req.user;
   try {
     const scans = await Scan.find({ user: req.user._id });
     res.json(200, {
       code: 200,
-      message: `All scans`,
+      message: `All scans for '${user.name}'`,
+      user: user,
       scans: scans
     });
   } catch (err) {
     console.log(err);
     res.json(404, {
       code: 404,
-      message: `No scans were found`
+      message: `No scans were found for '${user.name}'`
     });
   }
   next();
 };
 
 exports.getSingleScan = async (req, res, next) => {
+  const user = req.user;
   try {
     const scan = await Scan.findOne({ _id: req.params.id });
     res.json(200, {
       code: 200,
-      message: `Single scan `,
+      message: `Single scan for '${user.name}' `,
       scan: scan
     });
   } catch (err) {
     res.json(404, {
       code: 404,
-      message: "scan not found"
+      message: `Scan not found for '${user.name}'`
     });
     next(false);
     return;

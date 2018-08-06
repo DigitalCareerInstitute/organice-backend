@@ -16,8 +16,8 @@ const CategoryController = require("../controllers/CategoryController");
 router.post("/register", UserController.register);
 router.post("/login", AuthController.login);
 
-router.del("/users/deleteAll", UserController.deleteAllUsers);
-router.del("/scans/deleteAll", ScanController.deleteAllScans);
-router.del("/categories/deleteAll", CategoryController.deleteAllCategories);
+router.del("/users/delete-all", UserController.deleteAllUsers);
+router.del("/scans/delete-all", ScanController.deleteAllScans);
+router.del("/categories/delete-all", CategoryController.deleteAllCategories);
 
 module.exports = router;

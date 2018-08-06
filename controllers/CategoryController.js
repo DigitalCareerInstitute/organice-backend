@@ -3,21 +3,42 @@ const Category = require("../models/Category");
 const ScanSchema = require("../models/Scan");
 
 exports.getCategories = async (req, res, next) => {
+  const user = req.user;
   try {
     const categories = await Category.find({ user: req.user._id });
     res.json(200, {
       code: 200,
-      message: `All categories`,
+      message: `All categories for '${user.name}'`,
+      user: user,
       categories: categories
     });
   } catch (err) {
     console.log(err);
     res.json(404, {
       code: 404,
-      message: `No categories were found`
+      message: `No categories were found for '${user.name}'`
     });
   }
   next();
+};
+
+exports.getSingleCategory = async (req, res, next) => {
+  const user = req.user;
+  try {
+    const category = await Category.findOne({ _id: req.params.id });
+    res.json(200, {
+      code: 200,
+      message: `Single category for '${user.name}' `,
+      category: category
+    });
+  } catch (err) {
+    res.json(404, {
+      code: 404,
+      message: `Category not found for '${user.name}'`
+    });
+    next(false);
+    return;
+  }
 };
 
 exports.createCategory = async (req, res, next) => {

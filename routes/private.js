@@ -53,6 +53,12 @@ router.get(
   CategoryController.getCategories
 );
 
+router.get(
+  "/categories/:id",
+  passportAuthenticate,
+  CategoryController.getSingleCategory
+);
+
 router.post(
   "/categories/add",
   passportAuthenticate,
