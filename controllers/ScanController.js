@@ -103,10 +103,13 @@ exports.uploadError = function(error, req, res, next) {
 };
 
 exports.resize = async (req, res, next) => {
-  console.log("$$$$", req.files.image.path);
-  if (!req.files) {
-    next();
-    return;
+  // console.log("$$$$", req.files.image.path);
+  if (!req.files.image) {
+    return res.json(404, {
+      code: 404,
+      message: "NO IMAGE PROVIDED"
+    });
+    next(false);
   }
 
   const filename = `${uuid.v4()}`;

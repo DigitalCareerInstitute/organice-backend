@@ -140,7 +140,7 @@ exports.deleteCategory = async (req, res, next) => {
 };
 
 exports.deleteAllCategories = async (req, res, next) => {
-  category.remove({}, function(err) {
+  Category.remove({}, function(err) {
     console.log("All CATEGORIES are removed");
     res.send("Successfully deleted all CATEGORIES");
     next();
