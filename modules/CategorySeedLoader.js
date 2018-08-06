@@ -13,7 +13,6 @@ async function CategorySeedLoader(user) {
 
   const CategoryModel = require("../models/Category");
   await CategoryModel.insertMany(categories);
-  process.exit();
 }
 
 module.exports.loadSeed = CategorySeedLoader;
