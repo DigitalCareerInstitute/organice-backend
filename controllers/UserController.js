@@ -1,16 +1,20 @@
 const mongoose = require("mongoose");
 const User = require("../models/User");
+const Scan = require("../models/Scan");
+const Category = require("../models/Category");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
 const promisify = require("es6-promisify");
 const path = require("path");
-require('dotenv').config({path: path.join(__dirname + '/.env')});
+require("dotenv").config({ path: path.join(__dirname + "/.env") });
 require("../handlers/passport");
 
 const LocalStrategy = require("passport-local").Strategy;
 const passportJWT = require("passport-jwt");
 const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
+
+const CategorySeedLoader = require("../modules/CategorySeedLoader");
 
 exports.register = async (req, res, next) => {
   const register = promisify(User.register, User);
@@ -39,6 +43,9 @@ exports.register = async (req, res, next) => {
       user.token = jwtToken;
       user.save();
 
+      // create categories
+      CategorySeedLoader.loadSeed(user);
+
       res.json(200, {
         code: 200,
         message: "User registered successfully. Please check the email.",
@@ -60,6 +67,35 @@ exports.register = async (req, res, next) => {
       console.log(error);
       next(false);
     });
+};
+
+exports.deleteUser = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ _id: req.user._id }).exec();
+
+    console.log("------------Deleted user--------------");
+    console.log(user);
+    if (!user) {
+      res.json(404, {
+        code: 404,
+        message: "user not found"
+      });
+      next(false);
+    }
+
+    user.remove();
+
+    return res.json(200, {
+      code: 200,
+      message: `Successfully Deleted`
+    });
+  } catch (err) {
+    console.log(err);
+    res.json(422, {
+      code: 422,
+      message: "Unprocessable entity"
+    });
+  }
 };
 
 exports.deleteAllUsers = async (req, res, next) => {

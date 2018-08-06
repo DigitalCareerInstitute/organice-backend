@@ -7,6 +7,9 @@ const passportLocalMongoose = require("passport-local-mongoose");
 const bcrypt = require("bcrypt");
 const bcryptNodeJs = require("bcrypt-nodejs");
 
+const scanModel = require("./Scan");
+const categoryModel = require("./Category");
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -49,6 +52,14 @@ const userSchema = new mongoose.Schema({
 // });
 
 /* Settings for passport-local-mongoose  */
+
+userSchema.pre("remove", function(next) {
+  // 'this' is the user being removed. Provide callbacks here if you want
+  // to be notified of the calls' result.
+  scanModel.remove({ user: this._id }).exec();
+  categoryModel.remove({ user: this._id }).exec();
+  next();
+});
 
 userSchema.plugin(passportLocalMongoose, { usernameField: "email" });
 userSchema.plugin(mongodbErrorHandler);
