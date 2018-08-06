@@ -24,10 +24,6 @@
 
 `curl -X POST http://localhost:8080/api/login -H "Content-Type: application/json" -d '{"email": "tommy@example.com","password":"password123"}'`
 
-`POST` localhost:8080/api/users/:id/reset
-
-`POST` localhost:8080/api/users/delete (delete) delete all users
-
 ### Protected Routes (Only valid with token)
 
 #### User
@@ -37,6 +33,8 @@
 `POST` localhost:8080/api/users/updatepassword
 
 `POST` localhost:8080/api/users/logout
+
+`POST` localhost:8080/api/users/delete
 
 ---
 
@@ -60,8 +58,6 @@
 
 `curl -X POST http://localhost:8080/api/scans/delete -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidG9tbXkiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwiaWQiOiI1YjU2ZGQ5NjUyOWVmMDY5MjFlZTdhYWMiLCJpYXQiOjE1MzI0MTk0NzksImV4cCI6MTUzMjU5MjI3OX0.Tzwe-BQ6qv3u06gYc8q2Su3rMcg_MFC0-8-n3JUG1_c' -H 'Content-Type: application/json' -H "id: 5b56e19a80f548787dec0ba8"`
 
-`GET` localhost:8080/api/scans/:id/
-
 ---
 
 #### Categories
@@ -73,3 +69,11 @@
 `POST` localhost:8080/api/categories/:id/update
 
 `POST` localhost:8080/api/categories/:id/delete
+
+### Development testing routes
+
+`POST` localhost:8080/api/users/deleteAll (delete) delete all users
+
+`POST` localhost:8080/api/scans/deleteAll (delete) delete all scans
+
+`POST` localhost:8080/api/categories/deleteAll (delete) delete all categories
