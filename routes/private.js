@@ -1,7 +1,26 @@
 const Router = require("restify-router").Router;
 const router = new Router();
 const passport = require("passport");
-const passportAuthenticate = passport.authenticate("jwt", { session: false });
+const passportAuthenticate = function (req, res, next) {
+  passport.authenticate("jwt", { session: false }, function (err, user, info) {
+    
+    if (err) { return next(err); }
+    if (!user) {
+      res.json(403, {
+        code: 403,
+        message: "Unauthorized",
+        url: `http://${req.headers.host}/login`
+      });
+    }
+
+    req.logIn(user, function (err) {
+      
+      if (err) { return next(err); }
+      next();
+    });
+
+  })(req, res, next);
+};
 
 const AuthController = require("../controllers/AuthController");
 const UserController = require("../controllers/UserController");
