@@ -109,7 +109,7 @@ exports.uploadError = function(error, req, res, next) {
 };
 
 exports.resize = async (req, res, next) => {
-  if (!req.files.image) {
+  if (!req.files || !req.files.image){
     return res.json(404, {
       code: 404,
       message: "NO IMAGE PROVIDED"
