@@ -10,8 +10,10 @@ async function CategorySeedLoader(user) {
     category.user = user._id;
     return category;
   });
+  const categorySchema = require("../models/Category");
+  const CategoryModel = mongoose.model("Category", categorySchema);
 
-  const CategoryModel = require("../models/Category");
+  // const CategoryModel = require("../models/Category");
   await CategoryModel.insertMany(categories);
 }
 

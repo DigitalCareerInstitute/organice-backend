@@ -1,10 +1,11 @@
 const Router = require("restify-router").Router;
 const router = new Router();
 const passport = require("passport");
-const passportAuthenticate = function (req, res, next) {
-  passport.authenticate("jwt", { session: false }, function (err, user, info) {
-    
-    if (err) { return next(err); }
+const passportAuthenticate = function(req, res, next) {
+  passport.authenticate("jwt", { session: false }, function(err, user, info) {
+    if (err) {
+      return next(err);
+    }
     if (!user) {
       res.json(403, {
         code: 403,
@@ -13,12 +14,12 @@ const passportAuthenticate = function (req, res, next) {
       });
     }
 
-    req.logIn(user, function (err) {
-      
-      if (err) { return next(err); }
+    req.logIn(user, function(err) {
+      if (err) {
+        return next(err);
+      }
       next();
     });
-
   })(req, res, next);
 };
 
@@ -46,9 +47,7 @@ router.get("/scans/:id", passportAuthenticate, ScanController.getSingleScan);
 router.post(
   "/scans/add",
   passportAuthenticate,
-  // ScanController.upload,
-  // ScanController.uploadError
-  ScanController.resize,
+  ScanController.UploadAndResize,
   ScanController.recognizeText,
   ScanController.createScan
 );

@@ -1,14 +1,13 @@
-const {parse, stringify} = require('flatted/cjs');
+const { parse, stringify } = require("flatted/cjs");
 const mongoose = require("mongoose");
 const scanSchema = require("../models/Scan");
 const Scan = mongoose.model("Scan", scanSchema);
-const multer = require("multer");
 const jimp = require("jimp");
 const uuid = require("uuid");
 const fs = require("fs");
 const path = require("path");
-const Tesseract = require('tesseract.js')
-const { createRecursiveFolderPath } = require('../handlers/helpers')
+const Tesseract = require("tesseract.js");
+const { createRecursiveFolderPath } = require("../handlers/helpers");
 const FILE_PATH = "./temp/uploads/scans/";
 
 exports.getScans = async (req, res, next) => {
@@ -50,67 +49,8 @@ exports.getSingleScan = async (req, res, next) => {
   }
 };
 
-exports.upload = (req, res, next) => {
-  // console.log("++++++++ Multer Req ++++++++");
-  // console.log(req);
-
-  const storage = multer.diskStorage({
-    destination: function(req, file, next) {
-      next(null, "./temp_multer");
-    },
-    filename: function(req, file, next) {
-      next(null, uuid(4));
-    }
-  });
-
-  multer({
-    storage,
-    limits: {
-      fileSize: 10000000 // 10 MB
-    },
-    fileFilter(req, file, next) {
-      console.log("++++++++ Multer Req ++++++++");
-      console.log(req);
-      const isImage = file.mimetype.startsWith("image/");
-      console.log(storage);
-      console.log("test-req-multer");
-      console.log(req);
-      if (isImage) {
-        next(null, true);
-      } else {
-        next({ message: "That filetype is not allowed!" }, false);
-      }
-    }
-  }).single("image");
-};
-
-exports.uploadError = function(error, req, res, next) {
-  console.log(req.file);
-
-  if (error) {
-    let message = "Error during file upload. Please try again later.";
-
-    switch (error.code) {
-      case "LIMIT_FILE_SIZE":
-        message = "The file is too large. Max. 10 MB allowed!";
-        break;
-
-      case "FILETYPE_NOT_ALLOWED":
-        message =
-          'The file type is not allowed. Only file types "JPEG, PNG, GIF" allowed!';
-        break;
-    }
-
-    return res.json(422, {
-      code: 422,
-      message
-    });
-  }
-  next();
-};
-
-exports.resize = async (req, res, next) => {
-  if (!req.files || !req.files.image){
+exports.UploadAndResize = async (req, res, next) => {
+  if (!req.files || !req.files.image) {
     return res.json(404, {
       code: 404,
       message: "NO IMAGE PROVIDED"
@@ -150,26 +90,27 @@ exports.resize = async (req, res, next) => {
 };
 
 exports.recognizeText = async (req, res, next) => {
-  
   const tesseract = Tesseract.create({
-    workerPath: path.join(__dirname, '../tesseract/src/node/worker.js'),
-    langPath: path.join(__dirname, '../tesseract/langs/'),
-    corePath: path.join(__dirname, '../tesseract/src/index.js')
-  })
-    
-  tesseract.recognize(req.image.file)
-  .progress(function(message){
-    console.log(message)
-  })
-    .then(function (result) {
-      req.recognizedText = result
+    workerPath: path.join(__dirname, "../tesseract/src/node/worker.js"),
+    langPath: path.join(__dirname, "../tesseract/langs/"),
+    corePath: path.join(__dirname, "../tesseract/src/index.js")
+  });
+
+  tesseract
+    .recognize(req.image.file)
+    .progress(function(message) {
+      console.log(message);
+    })
+    .then(function(result) {
+      req.recognizedText = result;
+      console.log("+++++++ TESSERACT RESULT +++++++++");
+      console.log(result);
       next();
     })
-    .catch(err => console.error(err))
-}
-  
-exports.createScan = async (req, res, next) => {
+    .catch(err => console.error(err));
+};
 
+exports.createScan = async (req, res, next) => {
   try {
     const foundScan = await Scan.findOne(
       { title: req._body.title },
@@ -185,22 +126,22 @@ exports.createScan = async (req, res, next) => {
       next(false);
       return;
     }
-    
+
     parsedRecognizedText = JSON.parse(stringify(req.recognizedText));
-    
+
     let scanObject = {
       user: req.user._id,
       title: req._body.title,
       category: req._body.category,
       image: req.image.name,
-      content: req._body.content,
+      content: req.recognizedText.text,
       date: req._body.date,
       recognizedText: {
         text: req.recognizedText.text,
         html: req.recognizedText.html,
         confidence: req.recognizedText.confidence,
         completeData: parsedRecognizedText
-      },
+      }
     };
 
     const scan = await new Scan(scanObject).save();
@@ -210,7 +151,6 @@ exports.createScan = async (req, res, next) => {
       message: `Successfully created '${scan.title}'`,
       scan: scanObject
     });
-
   } catch (err) {
     console.log(err);
     res.json(422, {

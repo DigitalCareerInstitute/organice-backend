@@ -10,7 +10,7 @@ const errorHandlers = require("./handlers/errorHandlers");
 const JWTAuthenticatedUser = require("./handlers/JWTAuthenticatedUser");
 const path = require("path");
 require("./handlers/passport");
-require('dotenv').config({path: path.join(__dirname + '/.env')});
+require("dotenv").config({ path: path.join(__dirname + "/.env") });
 //const requireAuth = passport.authenticate("jwt", { session: false });
 
 const routes = {
@@ -23,13 +23,11 @@ server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
 server.use(restify.plugins.urlEncodedBodyParser());
 
-server.use(
-  function crossOrigin(req,res,next){
-    //TODO Limit cors Access to production domain
-    res.header("Access-Control-Allow-Origin", "*");
-    return next();
-  }
-);
+server.use(function crossOrigin(req, res, next) {
+  //TODO Limit cors Access to production domain
+  res.header("Access-Control-Allow-Origin", "*");
+  return next();
+});
 
 server.use(passport.initialize());
 server.use(passport.session());
@@ -54,14 +52,17 @@ if (
     }
   };
 }
-var database_to_use = process.env.NODE_ENV == "test" ? `${process.env.DATABASE_NAME}-test` : process.env.DATABASE_NAME;
+var database_to_use =
+  process.env.NODE_ENV == "test"
+    ? process.env.DATABASE_NAME_TEST
+    : process.env.DATABASE_NAME;
+// var database_to_use = process.env.DATABASE_NAME;
 
 mongoose.Promise = global.Promise;
 mongoose
   .connect(
     `mongodb://${process.env.DATABASE_HOST || "localhost"}:${process.env
-      .DATABASE_PORT || 27017}/${database_to_use ||
-      "react-native-app"}`,
+      .DATABASE_PORT || 27017}/${database_to_use || "react-native-app"}`,
     mongooseOptions
   )
   .catch(error => {
@@ -82,4 +83,4 @@ server.on("uncaughtException", function(req, res, route, error) {
 routes.public.applyRoutes(server, "/api");
 routes.private.applyRoutes(server, "/api");
 
-module.exports = server
+module.exports = server;
