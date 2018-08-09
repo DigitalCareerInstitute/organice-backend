@@ -31,22 +31,14 @@ server.use(
   }
 );
 
-// Require the models
-require("./models/User");
-require("./models/Category");
-require("./models/Scan");
-
-// Passport
 server.use(passport.initialize());
 server.use(passport.session());
 
-// Promisify
 server.use((req, res, next) => {
   req.login = promisify(req.login, req);
   next();
 });
 
-// MONGOOSE
 let mongooseOptions = {};
 
 if (
@@ -62,12 +54,13 @@ if (
     }
   };
 }
+var database_to_use = process.env.NODE_ENV == "test" ? `${process.env.DATABASE_NAME}-test` : process.env.DATABASE_NAME;
 
 mongoose.Promise = global.Promise;
 mongoose
   .connect(
-    `mongodb://${process.env.DATABASE_HOST || localhost}:${process.env
-      .DATABASE_PORT || 27017}/${process.env.DATABASE_NAME ||
+    `mongodb://${process.env.DATABASE_HOST || "localhost"}:${process.env
+      .DATABASE_PORT || 27017}/${database_to_use ||
       "react-native-app"}`,
     mongooseOptions
   )
@@ -75,12 +68,6 @@ mongoose
     console.error(`🙅 🚫 🙅 🚫 🙅 🚫 🙅 🚫 → ${error.message}`);
     process.exit(1);
   });
-
-// Restify Server
-
-
-// server.use(restifyValidator);
-// server.use(expressValidator());
 
 server.use(function logger(req, res, next) {
   console.log(new Date(), req.method, req.url);
@@ -95,42 +82,4 @@ server.on("uncaughtException", function(req, res, route, error) {
 routes.public.applyRoutes(server, "/api");
 routes.private.applyRoutes(server, "/api");
 
-// server.get("/api", requireAuth, async (req, res, next) => {
-//   res.send("valid");
-//   next();
-// });
-
-// server.get("/api", JWTAuthenticatedUser.check);
-//server.use(JWTAuthenticatedUser.check);
-
-// server.use(passport.authenticate("jwt", { session: false }));
-
-// Display the routes in the console ;)
-const port = process.env.PORT || "8080";
-const domain = process.env.DOMAIN || "localhost";
-
-console.log("Routes:");
-for (const key in server.router._registry._routes) {
-  console.log(
-    "\x1b[36m%s\x1b[0m",
-    key,
-    `http://${domain}:${port}${server.router._registry._routes[key].spec.path}`
-  );
-}
-console.log(`========================`);
-
-server.listen(port, function() {
-  console.log(`👂 Listening at http://${domain}:${port} 👂`);
-});
-
-/* ERROR HANDLING */
-
-// server.use(errorHandlers.notFound);
-
-// server.use(errorHandlers.flashValidationErrors);
-
-// if (server.get("env") === "development") {
-//   server.use(errorHandlers.developmentErrors);
-// }
-
-// server.use(errorHandlers.productionErrors);
+module.exports = server

@@ -8,8 +8,8 @@ const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 
 // const User = mongoose.model("User");
-const User = require("../models/User");
-const Scan = require("../models/Scan");
+const userSchema = require("../models/User");
+const User = mongoose.model("User", userSchema);
 
 passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());

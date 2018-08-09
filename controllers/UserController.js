@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const User = require("../models/User");
+const userSchema = require("../models/User");
+const User = mongoose.model("User", userSchema);
 const Scan = require("../models/Scan");
 const Category = require("../models/Category");
 const jwt = require("jsonwebtoken");
@@ -64,8 +65,6 @@ exports.register = async (req, res, next) => {
         message: "Unprocessable entity",
         error
       });
-      console.log(error);
-      next(false);
     });
 };
 

@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const mongodbErrorHandler = require("mongoose-mongodb-errors");
-const categoryModel = require("./Category");
 
 const scanSchema = new mongoose.Schema({
   user: {
@@ -52,4 +51,4 @@ const scanSchema = new mongoose.Schema({
 
 scanSchema.plugin(mongodbErrorHandler);
 
-module.exports = mongoose.model("Scan", scanSchema);
+module.exports = scanSchema;

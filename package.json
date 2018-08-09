@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "NODE_ENV=dev && node index.js",
+    "test": "NODE_ENV=test && mocha --timeout 10000"
   },
   "keywords": [],
   "author": "",
@@ -36,5 +37,10 @@
     "tesseract.js": "^1.0.10",
     "uuid": "^3.3.2",
     "validator": "^7.0.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-http": "^2.0.1",
+    "mocha": "^2.4.5"
   }
 }

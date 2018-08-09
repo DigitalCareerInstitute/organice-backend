@@ -1,6 +1,7 @@
 const {parse, stringify} = require('flatted/cjs');
 const mongoose = require("mongoose");
-const Scan = require("../models/Scan");
+const scanSchema = require("../models/Scan");
+const Scan = mongoose.model("Scan", scanSchema);
 const multer = require("multer");
 const jimp = require("jimp");
 const uuid = require("uuid");

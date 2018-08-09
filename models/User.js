@@ -64,4 +64,4 @@ userSchema.pre("remove", function(next) {
 userSchema.plugin(passportLocalMongoose, { usernameField: "email" });
 userSchema.plugin(mongodbErrorHandler);
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = userSchema;

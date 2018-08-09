@@ -5,7 +5,8 @@ const jwt = require("jsonwebtoken");
 require("../handlers/passport");
 // const User = mongoose.model("User");
 const promisify = require("es6-promisify");
-const User = require("../models/User");
+const userSchema = require("../models/User");
+const User = mongoose.model("User", userSchema);
 const { isJsonString } = require('../handlers/helpers')
 require("../handlers/passport");
 
