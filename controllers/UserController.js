@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const nodemailer = require("nodemailer");
 const userSchema = require("../models/User");
 const User = mongoose.model("User", userSchema);
 const Scan = require("../models/Scan");
@@ -44,20 +45,43 @@ exports.register = async (req, res, next) => {
       user.token = jwtToken;
       user.save();
 
-      // create categories
       CategorySeedLoader.loadSeed(user);
 
-      res.json(200, {
-        code: 200,
-        message: "User registered successfully. Please check the email.",
-        user: {
-          name: req.body.name,
-          email: req.body.email,
-          id: user._id,
-          token: user.token
+      let transporter = nodemailer.createTransport({
+        host: process.env.MAILHOST,
+        port: 587,
+        secure: false,
+        auth: {
+          user: process.env.MAILUSER,
+          pass: process.env.MAILPW
         }
       });
-      next();
+
+      let mailOptions = {
+        from: '"Organice" <info@organice.tmy.io>',
+        to: req.body.email,
+        subject: 'Registration complete',
+        text: `Hey, thanks for registering with Organice. Your password is: ${req.body.password}`,
+        html: `Hey, thanks for registering with <b>Organice.</b> Your password is: <br/> ${req.body.password}`
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          return console.log(error);
+        }
+
+        res.json(200, {
+          code: 200,
+          message: "User registered successfully. Please check the email.",
+          user: {
+            name: req.body.name,
+            email: req.body.email,
+            id: user._id,
+            token: user.token
+          }
+        });
+        next();
+      });
     })
     .catch(error => {
       res.json(422, {
