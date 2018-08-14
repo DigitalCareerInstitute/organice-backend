@@ -49,7 +49,7 @@ exports.register = async (req, res, next) => {
 
       let transporter = nodemailer.createTransport({
         host: process.env.MAILHOST,
-        port: 587,
+        port: process.env.MAIL_PORT,
         secure: false,
         auth: {
           user: process.env.MAILUSER,
@@ -58,16 +58,27 @@ exports.register = async (req, res, next) => {
       });
 
       let mailOptions = {
-        from: '"Organice" <info@organice.tmy.io>',
+        from: `"Organice" <info@organice.tmy.io>`,
         to: req.body.email,
-        subject: 'Registration complete',
-        text: `Hey, thanks for registering with Organice. Your password is: ${req.body.password}`,
-        html: `Hey, thanks for registering with <b>Organice.</b> Your password is: <br/> ${req.body.password}`
+        subject: "Registration complete",
+        text: `Hey, thanks for registering with Organice. Your password is: ${
+          req.body.password
+        }`,
+        html: `Hey, thanks "${
+          req.body.name
+        }" for registering with <b>Organice.</b> <br>
+              Your password is: <br/> <b>${req.body.password}</b> `
       };
 
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
-          return console.log(error);
+          console.log(error);
+
+          res.send({
+            ERROR: error,
+            UserInfo: `Your password is:  '${req.body.password}'`
+          });
+          return;
         }
 
         res.json(200, {
