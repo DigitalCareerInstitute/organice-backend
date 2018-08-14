@@ -31,6 +31,7 @@
     "passport-local-mongoose": "^4.0.0",
     "passport-restify": "^1.0.1",
     "restify": "^7.2.1",
+    "restify-cors-middleware": "^1.1.1",
     "restify-plugins": "^1.6.0",
     "restify-router": "^0.5.0",
     "restify-session": "^1.1.1",

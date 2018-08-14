@@ -23,11 +23,33 @@ server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
 server.use(restify.plugins.urlEncodedBodyParser());
 
-server.use(function crossOrigin(req, res, next) {
-  //TODO Limit cors Access to production domain
-  res.header("Access-Control-Allow-Origin", "*");
-  return next();
-});
+//TODO this enables CORS for the webinterface.
+//It would be better to make this work without external library
+//https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+const corsMiddleware = require('restify-cors-middleware')
+
+const cors = corsMiddleware({
+  preflightMaxAge: 5, //Optional
+  origins: ['http://localhost:3000', 'http://organice.tmy.io'],
+  allowHeaders: ['Authorization'],
+  exposeHeaders: ['Authorization']
+})
+
+server.pre(cors.preflight)
+server.use(cors.actual)
+
+
+// server.use(function crossOrigin(req, res, next) {
+//   //TODO Limit cors Access to production domain
+//   res.header('Access-Control-Allow-Origin', '*');
+//   res.header('Access-Control-Allow-Headers', 'Origin, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-Response-Time, X-PINGOTHER, X-CSRF-Token,Authorization');
+//   res.header('Access-Control-Allow-Methods', '*');
+//   res.header('Access-Control-Expose-Headers', 'X-Api-Version, X-Request-Id, X-Response-Time');
+//   res.header('Access-Control-Max-Age', '1000');
+//   res.header("Access-Control-Allow-Origin", "*");
+//   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Authorization");
+//   return next();
+// });
 
 server.use(passport.initialize());
 server.use(passport.session());
