@@ -1,14 +1,13 @@
 const mongoose = require("mongoose");
 mongoose.Promise = global.Promise;
-const md5 = require("md5");
 const validator = require("validator");
 const mongodbErrorHandler = require("mongoose-mongodb-errors");
 const passportLocalMongoose = require("passport-local-mongoose");
-const bcrypt = require("bcrypt");
-const bcryptNodeJs = require("bcrypt-nodejs");
 
-const scanModel = require("./Scan");
-const categoryModel = require("./Category");
+const categorySchema = require("../models/Category");
+const scanSchema = require("../models/Scan");
+const scanModel = mongoose.model("Scan", scanSchema);
+const categoryModel = mongoose.model("Category", categorySchema);
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -34,22 +33,6 @@ const userSchema = new mongoose.Schema({
   resetPasswordToken: String,
   resetPasswordExpires: Date
 });
-
-/* GENERATING HASH */
-
-// userSchema.methods.generateHash = function(password) {
-//   return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
-// };
-
-// userSchema.methods.validPassword = function(password) {
-//   return bcrypt.compareSync(password, this.local.password);
-// };
-
-/* Generating AVATAR for the user relying on GRAVATAR */
-// userSchema.virtual("gravatar").get(function() {
-//  const hash = md5(this.email)
-//  return `https://gravatar.com/avatar/${hash}?s=200`
-// });
 
 /* Settings for passport-local-mongoose  */
 
