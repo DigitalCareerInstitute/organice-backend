@@ -44,6 +44,9 @@ const scanSchema = new mongoose.Schema({
   recognizedText: {
     type: mongoose.Schema.Types.Mixed
   },
+  file: {
+    type: mongoose.Schema.Types.Mixed
+  }
   // date_from_scan : {
   //   content:
   //   }

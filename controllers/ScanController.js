@@ -14,6 +14,15 @@ exports.getScans = async (req, res, next) => {
   const user = req.user;
   try {
     const scans = await Scan.find({ user: req.user._id });
+
+    scans.forEach(scan => {
+      let fileBlob = fs.statSync(
+        path.join(process.env.PWD, "temp", "uploads", "scans", scan.image)
+      );
+      console.log(fileBlob);
+      scan.file = fileBlob;
+    });
+
     res.json(200, {
       code: 200,
       message: `All scans for '${user.name}'`,
@@ -34,13 +43,21 @@ exports.getSingleScan = async (req, res, next) => {
   const user = req.user;
   try {
     const scan = await Scan.findOne({ _id: req.params.id });
-    var fileBlob = fs.statSync(path.join(process.env.PWD, 'temp', 'uploads', 'scans', scan.image));
+    const imagePath = path.join(
+      process.env.PWD,
+      "temp",
+      "uploads",
+      "scans",
+      scan.image
+    );
+    const image = fs.readFileSync(imagePath);
+    const base64 = new Buffer(image).toString("base64");
 
     res.json(200, {
       code: 200,
       message: `Single scan for '${user.name}' `,
       scan: scan,
-      file: fileBlob
+      file: base64
     });
   } catch (err) {
     res.json(404, {
@@ -138,13 +155,13 @@ exports.createScan = async (req, res, next) => {
       category: req._body.category,
       image: req.image.name,
       content: req.recognizedText.text,
-      date: req._body.date,
-      recognizedText: {
-        text: req.recognizedText.text,
-        html: req.recognizedText.html,
-        confidence: req.recognizedText.confidence,
-        completeData: parsedRecognizedText
-      }
+      date: req._body.date
+      // recognizedText: {
+      //   text: req.recognizedText.text,
+      //   html: req.recognizedText.html,
+      //   confidence: req.recognizedText.confidence,
+      //   completeData: parsedRecognizedText
+      // }
     };
 
     const scan = await new Scan(scanObject).save();
