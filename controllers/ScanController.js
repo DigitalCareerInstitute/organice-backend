@@ -34,15 +34,18 @@ exports.getSingleScan = async (req, res, next) => {
   const user = req.user;
   try {
     const scan = await Scan.findOne({ _id: req.params.id });
+    var fileBlob = fs.statSync(path.join(process.env.PWD, 'temp', 'uploads', 'scans', scan.image));
+
     res.json(200, {
       code: 200,
       message: `Single scan for '${user.name}' `,
-      scan: scan
+      scan: scan,
+      file: fileBlob
     });
   } catch (err) {
     res.json(404, {
       code: 404,
-      message: `Scan not found for '${user.name}'`
+      message: `Scan not found for '${user.name}' or Error: ${err}`
     });
     next(false);
     return;
