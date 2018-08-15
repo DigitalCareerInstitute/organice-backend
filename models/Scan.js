@@ -26,7 +26,7 @@ const scanSchema = new mongoose.Schema({
     required: "You must provide a name",
     unique: true
   },
-  image: {
+  imageName: {
     type: String,
     trim: true
     // required: "You must provide an image"
@@ -44,8 +44,9 @@ const scanSchema = new mongoose.Schema({
   recognizedText: {
     type: mongoose.Schema.Types.Mixed
   },
-  file: {
-    type: mongoose.Schema.Types.Mixed
+  image: {
+    type: Buffer
+    // contentType: String
   }
   // date_from_scan : {
   //   content:

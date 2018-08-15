@@ -15,13 +15,13 @@ exports.getScans = async (req, res, next) => {
   try {
     const scans = await Scan.find({ user: req.user._id });
 
-    scans.forEach(scan => {
-      let fileBlob = fs.statSync(
-        path.join(process.env.PWD, "temp", "uploads", "scans", scan.image)
-      );
-      console.log(fileBlob);
-      scan.file = fileBlob;
-    });
+    // scans.forEach(scan => {
+    //   let imagePath = fs.statSync(
+    //     path.join(process.env.PWD, "temp", "uploads", "scans", scan.image)
+    //   );
+    //   console.log(imagePath);
+    //   scan.file = imagePath;
+    // });
 
     res.json(200, {
       code: 200,
@@ -43,21 +43,23 @@ exports.getSingleScan = async (req, res, next) => {
   const user = req.user;
   try {
     const scan = await Scan.findOne({ _id: req.params.id });
-    const imagePath = path.join(
-      process.env.PWD,
-      "temp",
-      "uploads",
-      "scans",
-      scan.image
-    );
-    const image = fs.readFileSync(imagePath);
-    const base64 = new Buffer(image).toString("base64");
+    // const imagePath = path.join(
+    //   process.env.PWD,
+    //   "temp",
+    //   "uploads",
+    //   "scans",
+    //   scan.image
+    // );
+    // // console.log("image path");
+    // // console.log(imagePath);
+    // const image = fs.readFileSync(imagePath);
+    // const base64 = new Buffer(image).toString("base64");
 
     res.json(200, {
       code: 200,
       message: `Single scan for '${user.name}' `,
-      scan: scan,
-      file: base64
+      scan: scan
+      // file: base64
     });
   } catch (err) {
     res.json(404, {
@@ -104,6 +106,14 @@ exports.UploadAndResize = async (req, res, next) => {
   await thumbnailImage.cover(400, 400).quality(70);
   await thumbnailImage.write(files.thumbnail.file);
 
+  // console.log("this should be the image");
+  // console.log(files.original.file);
+
+  const image = fs.readFileSync(files.original.file);
+  const base64 = new Buffer(image).toString("base64");
+  req.base64 = base64;
+  // console.log(base64);
+
   req.image = files.original;
 
   next();
@@ -119,12 +129,12 @@ exports.recognizeText = async (req, res, next) => {
   tesseract
     .recognize(req.image.file)
     .progress(function(message) {
-      console.log(message);
+      // console.log(message);
     })
     .then(function(result) {
       req.recognizedText = result;
       console.log("+++++++ TESSERACT RESULT +++++++++");
-      console.log(result);
+      // console.log(result);
       next();
     })
     .catch(err => console.error(err));
@@ -148,14 +158,15 @@ exports.createScan = async (req, res, next) => {
     }
 
     parsedRecognizedText = JSON.parse(stringify(req.recognizedText));
-
+    // console.log(req.base64);
     let scanObject = {
       user: req.user._id,
       title: req._body.title,
       category: req._body.category,
-      image: req.image.name,
+      imageName: req.image.name,
       content: req.recognizedText.text,
-      date: req._body.date
+      date: req._body.date,
+      image: req.base64
       // recognizedText: {
       //   text: req.recognizedText.text,
       //   html: req.recognizedText.html,
